@@ -119,7 +119,6 @@
                     </div>
                 </div>
 
-                <!-- Botón de emergencia para resetear datos pegados -->
                 <button onclick="resetearApp()" class="w-full bg-red-100 text-red-700 p-3 rounded-xl font-bold shadow text-sm mt-8 border border-red-300">
                     Borrar Datos Locales y Recargar
                 </button>
@@ -157,13 +156,14 @@
         </div>
     </div>
 
-    <div id="toast" class="fixed bottom-5 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full shadow-2xl transition-opacity duration-300 opacity-0 pointer-events-none z-50 flex items-center gap-2 font-bold text-center w-max max-w-xs">
+    <!-- EL Z-INDEX ESTÁ AHORA EN 9999 PARA QUE NUNCA QUEDE OCULTO -->
+    <div id="toast" class="fixed bottom-5 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full shadow-2xl transition-opacity duration-300 opacity-0 pointer-events-none z-[9999] flex items-center gap-2 font-bold text-center w-max max-w-xs">
         <span id="toastMsg">Mensaje</span>
     </div>
 
     <script>
         // PEGA AQUÍ TU URL
-        const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbymMtKgnX-1HgY72Qhe75llPNzM0XXRco6Vy9i46JHIyEwx-pffCRyk1NwNuENWhmI/exec'; 
+        const WEBHOOK_URL = 'URL_DE_TU_WEBHOOK_AQUI'; 
 
         let db;
         let currentMonto = 0;
@@ -172,7 +172,6 @@
         let workers = [];
         let squads = [];
 
-        // VERSIÓN 3: Forzar destrucción de bases viejas
         const request = indexedDB.open('ComidasDB', 3); 
         
         request.onupgradeneeded = (e) => {
@@ -237,20 +236,27 @@
             document.getElementById(`btn-${typeClass}`).classList.add('border-gray-800', 'shadow-inner', 'ring-4', 'ring-gray-300');
         }
 
-        function loadSquads() {
+        // --- Cargar cuadrillas con autoselección ---
+        function loadSquads(autoSelectName = null) {
             db.transaction('squads').objectStore('squads').getAll().onsuccess = (e) => {
                 squads = e.target.result;
                 const select = document.getElementById('newWorkerSquad');
                 select.innerHTML = '<option value="" disabled selected>Selecciona cuadrilla</option>';
-                squads.forEach(s => select.innerHTML += `<option value="${s.name}">${s.name}</option>`);
+                squads.forEach(s => {
+                    const selected = (s.name === autoSelectName) ? 'selected' : '';
+                    select.innerHTML += `<option value="${s.name}" ${selected}>${s.name}</option>`;
+                });
             };
         }
 
         function saveSquad() {
             const name = document.getElementById('newSquadName').value.trim();
-            if (!name) return;
+            if (!name) return showToast('⚠️ Escribe el nombre de la cuadrilla');
             db.transaction('squads', 'readwrite').objectStore('squads').put({ name: name }).onsuccess = () => { 
-                loadSquads(); closeModal('squadModal'); document.getElementById('newSquadName').value = ''; showToast('Cuadrilla guardada'); 
+                loadSquads(name); // <-- Esto hace que se seleccione automáticamente al guardar
+                closeModal('squadModal'); 
+                document.getElementById('newSquadName').value = ''; 
+                showToast('Cuadrilla guardada y seleccionada'); 
             };
         }
 
@@ -265,7 +271,10 @@
         function saveWorker() {
             const name = document.getElementById('newWorkerName').value.trim();
             const squad = document.getElementById('newWorkerSquad').value;
-            if (!name || !squad) return showToast('⚠️ Llena nombre y cuadrilla');
+            
+            // Validaciones con mensajes claros
+            if (!name) return showToast('⚠️ Escribe el nombre del trabajador');
+            if (!squad) return showToast('⚠️ Por favor selecciona o crea una Cuadrilla');
             
             const newWorker = { 
                 name: name, squad: squad, 
@@ -378,36 +387,40 @@
 
             showToast('Conectando con Google Sheets...');
             
-            db.transaction('transactions').objectStore('transactions').index('synced').getAll(0).onsuccess = async (e) => {
-                const pending = e.target.result;
-                try {
-                    const response = await fetch(WEBHOOK_URL, { 
-                        method: 'POST', redirect: 'follow',
-                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                        body: JSON.stringify({ transactions: pending }) 
-                    });
-                    const result = await response.json();
+            // Recolectar datos pendientes y trabajadores locales
+            const pendingTxs = await new Promise(res => db.transaction('transactions').objectStore('transactions').index('synced').getAll(0).onsuccess = e => res(e.target.result));
+            const localWorkers = await new Promise(res => db.transaction('workers').objectStore('workers').getAll().onsuccess = e => res(e.target.result));
+
+            try {
+                const response = await fetch(WEBHOOK_URL, { 
+                    method: 'POST', redirect: 'follow',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ transactions: pendingTxs, workers: localWorkers }) 
+                });
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    const txUpdate = db.transaction(['transactions', 'workers', 'squads'], 'readwrite');
                     
-                    if (result.status === 'success') {
-                        const txUpdate = db.transaction(['transactions', 'workers', 'squads'], 'readwrite');
-                        const storeTx = txUpdate.objectStore('transactions');
-                        pending.forEach(p => { p.synced = 1; storeTx.put(p); });
+                    // 1. Marcar transacciones como subidas
+                    const storeTx = txUpdate.objectStore('transactions');
+                    pendingTxs.forEach(p => { p.synced = 1; storeTx.put(p); });
 
-                        const storeWorkers = txUpdate.objectStore('workers');
-                        const storeSquads = txUpdate.objectStore('squads');
-                        storeWorkers.clear(); storeSquads.clear();
-                        
-                        let uniqueSquads = new Set();
-                        result.workers.forEach(w => { storeWorkers.put(w); uniqueSquads.add(w.squad); });
-                        uniqueSquads.forEach(sq => storeSquads.put({ name: sq }));
+                    // 2. Reemplazar base de datos con la maestra de Sheets
+                    const storeWorkers = txUpdate.objectStore('workers');
+                    const storeSquads = txUpdate.objectStore('squads');
+                    storeWorkers.clear(); storeSquads.clear();
+                    
+                    let uniqueSquads = new Set();
+                    result.workers.forEach(w => { storeWorkers.put(w); uniqueSquads.add(w.squad); });
+                    uniqueSquads.forEach(sq => storeSquads.put({ name: sq }));
 
-                        txUpdate.oncomplete = () => { 
-                            showToast('✅ Sincronizado con Sheets'); 
-                            updateSyncBadge(); loadWorkers(); 
-                        };
-                    } else { showToast('❌ Error: ' + result.message); }
-                } catch (err) { showToast('❌ Error de red'); }
-            };
+                    txUpdate.oncomplete = () => { 
+                        showToast('✅ Sincronizado con Sheets'); 
+                        updateSyncBadge(); loadWorkers(); 
+                    };
+                } else { showToast('❌ Error: ' + result.message); }
+            } catch (err) { showToast('❌ Error de red'); }
         }
 
         function exportToExcel() {
