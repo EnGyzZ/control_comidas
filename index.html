@@ -15,7 +15,7 @@
 <body class="bg-gray-100 text-gray-800 font-sans h-screen flex flex-col overflow-hidden">
 
     <header class="bg-gray-900 text-white p-4 shadow-md flex justify-between items-center shrink-0">
-        <h1 class="text-xl font-bold">Registro Obra</h1>
+        <h1 class="text-xl font-bold">Registro Obra V3</h1>
         <div class="flex items-center gap-3">
             <span id="syncBadge" class="bg-yellow-500 text-xs text-black font-bold px-2 py-1 rounded-full hidden">0 Pendientes</span>
             <div id="statusIndicator" class="flex items-center gap-1 text-sm">
@@ -34,7 +34,6 @@
         
         <!-- REGISTRO -->
         <div id="view-registro" class="space-y-6 block pb-20">
-            
             <div class="bg-white p-4 rounded-xl shadow">
                 <div class="flex justify-between mb-3 items-center">
                     <label class="font-bold text-gray-700">Trabajador</label>
@@ -86,7 +85,7 @@
             <button onclick="registrarMovimiento()" class="w-full bg-gray-900 active:bg-black text-white p-5 rounded-xl text-2xl font-black shadow-xl mb-6">REGISTRAR</button>
         </div>
 
-        <!-- RESUMEN BIDIRECCIONAL -->
+        <!-- RESUMEN -->
         <div id="view-resumen" class="hidden pb-20">
             <div class="flex flex-col gap-4">
                 <button onclick="forceSync()" class="w-full bg-blue-600 active:bg-blue-800 text-white p-4 rounded-xl font-bold shadow flex justify-center items-center gap-2">
@@ -97,7 +96,7 @@
                 <div class="flex justify-between items-center bg-white p-4 rounded-xl shadow">
                     <div>
                         <h2 class="text-xl font-bold text-gray-800">Saldos (App + Sheets)</h2>
-                        <p class="text-xs text-gray-500">Muestra datos de Google + no sincronizados.</p>
+                        <p class="text-xs text-gray-500">Muestra datos sincronizados.</p>
                     </div>
                     <button onclick="exportToExcel()" class="bg-green-600 text-white px-3 py-2 rounded-lg font-bold shadow flex items-center gap-2 text-sm">
                         Descargar Excel
@@ -119,6 +118,11 @@
                         </table>
                     </div>
                 </div>
+
+                <!-- Botón de emergencia para resetear datos pegados -->
+                <button onclick="resetearApp()" class="w-full bg-red-100 text-red-700 p-3 rounded-xl font-bold shadow text-sm mt-8 border border-red-300">
+                    Borrar Datos Locales y Recargar
+                </button>
             </div>
         </div>
     </main>
@@ -126,8 +130,7 @@
     <!-- Modales -->
     <div id="workerModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50 p-4">
         <div class="bg-white p-6 rounded-xl w-full max-w-sm shadow-2xl">
-            <h3 class="font-bold text-lg mb-4">Agregar Trabajador Local</h3>
-            <p class="text-xs text-gray-500 mb-4">También puedes agregarlos directamente en Google Sheets y darle a "Sincronizar".</p>
+            <h3 class="font-bold text-lg mb-4">Agregar Trabajador</h3>
             <input type="text" id="newWorkerName" placeholder="Nombre completo o Apodo" class="w-full p-3 border rounded-lg mb-4 text-lg">
             
             <div class="flex justify-between items-center mb-2">
@@ -160,7 +163,7 @@
 
     <script>
         // PEGA AQUÍ TU URL
-        const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbymMtKgnX-1HgY72Qhe75llPNzM0XXRco6Vy9i46JHIyEwx-pffCRyk1NwNuENWhmI/exec'; 
+        const WEBHOOK_URL = 'URL_DE_TU_WEBHOOK_AQUI'; 
 
         let db;
         let currentMonto = 0;
@@ -169,8 +172,8 @@
         let workers = [];
         let squads = [];
 
-        // NUEVA VERSIÓN 2 DE LA DB: Las llaves ahora son los Nombres para poder sincronizar perfecto con Sheets
-        const request = indexedDB.open('ComidasDB', 2); 
+        // VERSIÓN 3: Forzar destrucción de bases viejas
+        const request = indexedDB.open('ComidasDB', 3); 
         
         request.onupgradeneeded = (e) => {
             db = e.target.result;
@@ -246,23 +249,23 @@
         function saveSquad() {
             const name = document.getElementById('newSquadName').value.trim();
             if (!name) return;
-            const tx = db.transaction('squads', 'readwrite');
-            tx.objectStore('squads').put({ name: name }); // put para sobrescribir
-            tx.oncomplete = () => { loadSquads(); closeModal('squadModal'); document.getElementById('newSquadName').value = ''; showToast('Cuadrilla guardada'); };
+            db.transaction('squads', 'readwrite').objectStore('squads').put({ name: name }).onsuccess = () => { 
+                loadSquads(); closeModal('squadModal'); document.getElementById('newSquadName').value = ''; showToast('Cuadrilla guardada'); 
+            };
         }
 
         function loadWorkers() {
             db.transaction('workers').objectStore('workers').getAll().onsuccess = (e) => {
                 workers = e.target.result;
                 renderWorkersUI();
-                if(document.getElementById('view-resumen').classList.contains('hidden') === false) buildSummaryTable();
+                if(!document.getElementById('view-resumen').classList.contains('hidden')) buildSummaryTable();
             };
         }
 
         function saveWorker() {
             const name = document.getElementById('newWorkerName').value.trim();
             const squad = document.getElementById('newWorkerSquad').value;
-            if (!name || !squad) { showToast('⚠️ Llena nombre y cuadrilla'); return; }
+            if (!name || !squad) return showToast('⚠️ Llena nombre y cuadrilla');
             
             const newWorker = { 
                 name: name, squad: squad, 
@@ -270,18 +273,17 @@
                 lunes:{des:0,com:0,soda:0}, martes:{des:0,com:0,soda:0}, miercoles:{des:0,com:0,soda:0},
                 jueves:{des:0,com:0,soda:0}, viernes:{des:0,com:0,soda:0}, sabado:{des:0,com:0,soda:0}
             };
-
-            const tx = db.transaction('workers', 'readwrite');
-            tx.objectStore('workers').put(newWorker);
-            tx.oncomplete = () => { loadWorkers(); closeModal('workerModal'); document.getElementById('newWorkerName').value = ''; showToast('Trabajador local guardado'); };
+            db.transaction('workers', 'readwrite').objectStore('workers').put(newWorker).onsuccess = () => { 
+                loadWorkers(); closeModal('workerModal'); document.getElementById('newWorkerName').value = ''; showToast('Trabajador guardado'); 
+            };
         }
 
         function renderWorkersUI() {
             const query = document.getElementById('searchInput').value.toLowerCase();
             const container = document.getElementById('workerGrid');
             container.innerHTML = '';
-
             const grouped = {};
+            
             workers.forEach(w => {
                 if(query && !w.name.toLowerCase().includes(query)) return;
                 if(!grouped[w.squad]) grouped[w.squad] = [];
@@ -295,8 +297,7 @@
                 squadWorkers.forEach(w => {
                     html += `<button onclick="selectWorker('${w.name}')" class="bg-gray-50 border border-gray-200 p-3 rounded-xl text-left shadow-sm active:bg-blue-100 transition-colors flex flex-col justify-center min-h-[60px]"><span class="font-bold text-gray-800 text-sm leading-tight">${w.name}</span></button>`;
                 });
-                html += `</div></div>`;
-                container.innerHTML += html;
+                container.innerHTML += html + `</div></div>`;
             }
         }
 
@@ -321,7 +322,7 @@
 
         function registrarMovimiento() {
             if (!currentWorkerName) return showToast('⚠️ Selecciona un trabajador');
-            if (currentMonto <= 0) return showToast('⚠️ El monto debe ser mayor a $0');
+            if (currentMonto <= 0) return showToast('⚠️ Monto debe ser mayor a $0');
             if (!currentType) return showToast('⚠️ Selecciona el tipo');
 
             const worker = workers.find(w => w.name === currentWorkerName);
@@ -332,32 +333,26 @@
                 date: tijuana.date, time: tijuana.time, day: tijuana.day, timestamp: tijuana.rawTime, synced: 0
             };
 
-            const tx = db.transaction('transactions', 'readwrite');
-            tx.objectStore('transactions').add(txData);
-            tx.oncomplete = () => {
+            db.transaction('transactions', 'readwrite').objectStore('transactions').add(txData).onsuccess = () => {
                 showToast(`✅ $${currentMonto} guardado`);
                 clearMonto(); clearWorkerSelection(); updateSyncBadge();
                 if(navigator.onLine) forceSync();
             };
         }
 
-        // --- CONSTRUIR RESUMEN: Datos de Sheets + Transacciones NO sincronizadas ---
         function buildSummaryTable() {
             if (!db) return;
             db.transaction('transactions').objectStore('transactions').index('synced').getAll(0).onsuccess = (e) => {
                 const pendingTxs = e.target.result;
                 const tbody = document.getElementById('summaryBody');
                 tbody.innerHTML = '';
-                
-                // Clonar datos de Sheets
                 const summary = JSON.parse(JSON.stringify(workers)); 
 
-                // Sumarle lo que aún no se envía a internet
                 pendingTxs.forEach(t => {
                     let w = summary.find(x => x.name === t.workerName);
                     if (w) {
                         if (t.type === 'Abono') w.abonado += t.amount;
-                        else w.totalSemana += t.amount; // Simplificación visual para la tabla
+                        else w.totalSemana += t.amount;
                         w.saldo = (w.totalSemana + w.totalExtras + w.faltanteAnt) - (w.abonado + w.abonoAnt);
                     }
                 });
@@ -377,7 +372,6 @@
             };
         }
 
-        // SINCRONIZACIÓN MAESTRA BIDIRECCIONAL
         async function forceSync() {
             if (!navigator.onLine) return showToast('Sin internet');
             if(WEBHOOK_URL === 'URL_DE_TU_WEBHOOK_AQUI') return showToast('⚠️ Falta configurar URL');
@@ -386,72 +380,50 @@
             
             db.transaction('transactions').objectStore('transactions').index('synced').getAll(0).onsuccess = async (e) => {
                 const pending = e.target.result;
-                
                 try {
                     const response = await fetch(WEBHOOK_URL, { 
                         method: 'POST', redirect: 'follow',
                         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                         body: JSON.stringify({ transactions: pending }) 
                     });
-                    
                     const result = await response.json();
                     
                     if (result.status === 'success') {
-                        // 1. Marcar transacciones locales como sincronizadas
                         const txUpdate = db.transaction(['transactions', 'workers', 'squads'], 'readwrite');
                         const storeTx = txUpdate.objectStore('transactions');
                         pending.forEach(p => { p.synced = 1; storeTx.put(p); });
 
-                        // 2. REEMPLAZAR LA BASE DE DATOS LOCAL CON LA DE GOOGLE SHEETS
                         const storeWorkers = txUpdate.objectStore('workers');
                         const storeSquads = txUpdate.objectStore('squads');
-                        
-                        storeWorkers.clear();
-                        storeSquads.clear();
+                        storeWorkers.clear(); storeSquads.clear();
                         
                         let uniqueSquads = new Set();
-                        result.workers.forEach(w => {
-                            storeWorkers.put(w);
-                            uniqueSquads.add(w.squad);
-                        });
-
+                        result.workers.forEach(w => { storeWorkers.put(w); uniqueSquads.add(w.squad); });
                         uniqueSquads.forEach(sq => storeSquads.put({ name: sq }));
 
                         txUpdate.oncomplete = () => { 
-                            showToast('✅ Base de datos actualizada con Sheets'); 
-                            updateSyncBadge();
-                            loadWorkers(); // Recarga la UI
+                            showToast('✅ Sincronizado con Sheets'); 
+                            updateSyncBadge(); loadWorkers(); 
                         };
-                    }
-                } catch (err) { 
-                    showToast('❌ Error de red');
-                }
+                    } else { showToast('❌ Error: ' + result.message); }
+                } catch (err) { showToast('❌ Error de red'); }
             };
         }
 
-        // Exportar a Excel local usando los datos traídos desde Sheets
         function exportToExcel() {
             const sortedWorkers = [...workers].sort((a, b) => a.squad.localeCompare(b.squad));
             const wsData = [
-                ['#', 'NOMBRE / APODO', 'CUADRILLA', 'FALTANTE ANT.', 'ABONO ANT.', 'TOTAL SEMANA ($)', 'TOTAL EXTRAS', 'ABONÓ / PAGÓ ($)', 'RESTA / SALDO ($)', 'LUNES', '', '', 'MARTES', '', '', 'MIÉRCOLES', '', '', 'JUEVES', '', '', 'VIERNES', '', '', 'SÁBADO', '', ''],
-                ['', '', '', '', '', '', '', '', '', 'DES', 'COM', 'SODA/EX', 'DES', 'COM', 'SODA/EX', 'DES', 'COM', 'SODA/EX', 'DES', 'COM', 'SODA/EX', 'DES', 'COM', 'SODA/EX', 'DES', 'COM', 'SODA/EX']
+                ['#', 'NOMBRE', 'CUADRILLA', 'FALTANTE ANT.', 'ABONO ANT.', 'TOTAL SEM. ($)', 'TOTAL EXTRAS', 'ABONÓ ($)', 'SALDO ($)', 'LUNES','','','MARTES','','','MIÉRCOLES','','','JUEVES','','','VIERNES','','','SÁBADO','',''],
+                ['','','','','','','','','','DES','COM','SODA','DES','COM','SODA','DES','COM','SODA','DES','COM','SODA','DES','COM','SODA','DES','COM','SODA']
             ];
-
             let index = 1;
             sortedWorkers.forEach(w => {
                 if(w.totalSemana > 0 || w.totalExtras > 0 || w.abonado > 0 || w.faltanteAnt > 0 || w.saldo > 0) {
-                    wsData.push([
-                        index++, w.name, w.squad, w.faltanteAnt, w.abonoAnt, w.totalSemana, w.totalExtras, w.abonado, w.saldo,
-                        w.lunes.des||'', w.lunes.com||'', w.lunes.soda||'', w.martes.des||'', w.martes.com||'', w.martes.soda||'',
-                        w.miercoles.des||'', w.miercoles.com||'', w.miercoles.soda||'', w.jueves.des||'', w.jueves.com||'', w.jueves.soda||'',
-                        w.viernes.des||'', w.viernes.com||'', w.viernes.soda||'', w.sabado.des||'', w.sabado.com||'', w.sabado.soda||''
-                    ]);
+                    wsData.push([index++, w.name, w.squad, w.faltanteAnt, w.abonoAnt, w.totalSemana, w.totalExtras, w.abonado, w.saldo, w.lunes.des||'', w.lunes.com||'', w.lunes.soda||'', w.martes.des||'', w.martes.com||'', w.martes.soda||'', w.miercoles.des||'', w.miercoles.com||'', w.miercoles.soda||'', w.jueves.des||'', w.jueves.com||'', w.jueves.soda||'', w.viernes.des||'', w.viernes.com||'', w.viernes.soda||'', w.sabado.des||'', w.sabado.com||'', w.sabado.soda||'']);
                 }
             });
-
             const ws = XLSX.utils.aoa_to_sheet(wsData);
             ws['!merges'] = [{s:{r:0,c:0},e:{r:1,c:0}}, {s:{r:0,c:1},e:{r:1,c:1}}, {s:{r:0,c:2},e:{r:1,c:2}}, {s:{r:0,c:3},e:{r:1,c:3}}, {s:{r:0,c:4},e:{r:1,c:4}}, {s:{r:0,c:5},e:{r:1,c:5}}, {s:{r:0,c:6},e:{r:1,c:6}}, {s:{r:0,c:7},e:{r:1,c:7}}, {s:{r:0,c:8},e:{r:1,c:8}}, {s:{r:0,c:9},e:{r:0,c:11}}, {s:{r:0,c:12},e:{r:0,c:14}}, {s:{r:0,c:15},e:{r:0,c:17}}, {s:{r:0,c:18},e:{r:0,c:20}}, {s:{r:0,c:21},e:{r:0,c:23}}, {s:{r:0,c:24},e:{r:0,c:26}}];
-
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Control");
             XLSX.writeFile(wb, `Control_${getTijuanaTimestamp().date}.xlsx`);
@@ -462,18 +434,27 @@
             db.transaction('transactions').objectStore('transactions').index('synced').getAll(0).onsuccess = (e) => {
                 const count = e.target.result.length;
                 const badge = document.getElementById('syncBadge');
-                if (count > 0) { badge.innerText = `${count} Pendientes`; badge.classList.remove('hidden'); } 
-                else badge.classList.add('hidden');
+                if (count > 0) { badge.innerText = `${count} Pendientes`; badge.classList.remove('hidden'); } else badge.classList.add('hidden');
             };
         }
 
         function checkConnection() {
-            const dot = document.getElementById('statusDot');
-            if (navigator.onLine) { dot.className = 'w-3 h-3 rounded-full bg-green-500'; document.getElementById('statusText').innerText = 'En Línea'; updateSyncBadge(); } 
-            else { dot.className = 'w-3 h-3 rounded-full bg-red-500'; document.getElementById('statusText').innerText = 'Offline'; }
+            if (navigator.onLine) { document.getElementById('statusDot').className = 'w-3 h-3 rounded-full bg-green-500'; document.getElementById('statusText').innerText = 'En Línea'; updateSyncBadge(); } 
+            else { document.getElementById('statusDot').className = 'w-3 h-3 rounded-full bg-red-500'; document.getElementById('statusText').innerText = 'Offline'; }
         }
         window.addEventListener('online', () => { checkConnection(); forceSync(); });
         window.addEventListener('offline', checkConnection);
+
+        function resetearApp() {
+            if(confirm("¿Seguro que quieres borrar la base de datos local? Si tienes pendientes por sincronizar, se perderán.")) {
+                indexedDB.deleteDatabase("ComidasDB");
+                navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                    for(let registration of registrations) { registration.unregister(); }
+                });
+                alert("App reiniciada. La página se recargará ahora.");
+                window.location.reload(true);
+            }
+        }
 
         if ('serviceWorker' in navigator) { window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js')); }
     </script>
