@@ -14,7 +14,6 @@
 </head>
 <body class="bg-gray-100 text-gray-800 font-sans h-screen flex flex-col overflow-hidden">
 
-    <!-- Header / Estado -->
     <header class="bg-gray-900 text-white p-4 shadow-md flex justify-between items-center shrink-0">
         <h1 class="text-xl font-bold">Registro Obra</h1>
         <div class="flex items-center gap-3">
@@ -26,34 +25,25 @@
         </div>
     </header>
 
-    <!-- Navegación por Pestañas -->
     <nav class="flex bg-white shadow shrink-0">
         <button onclick="switchTab('registro')" id="tab-registro" class="flex-1 py-3 text-center font-bold border-b-4 border-blue-600 text-blue-600">Registro Rápido</button>
         <button onclick="switchTab('resumen')" id="tab-resumen" class="flex-1 py-3 text-center font-bold border-b-4 border-transparent text-gray-500">Resumen Semanal</button>
     </nav>
 
-    <!-- Contenedor Principal -->
     <main class="flex-1 overflow-y-auto p-4 relative">
         
-        <!-- PESTAÑA 1: REGISTRO -->
+        <!-- REGISTRO -->
         <div id="view-registro" class="space-y-6 block pb-20">
             
-            <!-- Buscador y Selección de Trabajador Visual -->
             <div class="bg-white p-4 rounded-xl shadow">
                 <div class="flex justify-between mb-3 items-center">
                     <label class="font-bold text-gray-700">Trabajador</label>
-                    <button onclick="openModal('workerModal')" class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full font-bold text-sm shadow-sm">+ Nuevo</button>
+                    <button onclick="openModal('workerModal')" class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full font-bold text-sm shadow-sm">+ Nuevo Local</button>
                 </div>
-                
-                <!-- Buscador (Opcional) -->
                 <input type="text" id="searchInput" placeholder="Buscar por nombre..." class="w-full p-3 border rounded-lg text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 mb-3" oninput="renderWorkersUI()">
                 
-                <!-- Grid Visual por Cuadrillas -->
-                <div id="workerGrid" class="max-h-64 overflow-y-auto pr-1">
-                    <!-- Generado dinámicamente -->
-                </div>
+                <div id="workerGrid" class="max-h-64 overflow-y-auto pr-1"></div>
 
-                <!-- Tarjeta de Trabajador Seleccionado -->
                 <div id="selectedWorkerDisplay" class="hidden mt-2 p-4 bg-blue-600 text-white border-2 border-blue-800 rounded-xl flex justify-between items-center shadow-lg">
                     <div>
                         <div class="text-xs text-blue-200 uppercase font-bold tracking-wider" id="swSquad"></div>
@@ -63,15 +53,13 @@
                 </div>
             </div>
 
-            <!-- Totalizador / Teclado Rápido -->
             <div class="bg-white p-4 rounded-xl shadow">
                 <label class="font-bold text-gray-700 mb-2 block">Monto a Registar</label>
                 <div class="text-5xl font-black text-center text-gray-800 bg-gray-100 p-4 rounded-lg mb-4 tracking-tight" id="montoDisplay">$0</div>
-                
                 <div class="grid grid-cols-4 gap-2 mb-2">
-                    <button onclick="addMonto(80)" class="col-span-2 bg-blue-600 active:bg-blue-800 text-white p-4 rounded-lg text-2xl font-bold shadow transition-colors">+$80</button>
-                    <button onclick="addMonto(10)" class="bg-blue-500 active:bg-blue-700 text-white p-4 rounded-lg text-xl shadow transition-colors">+$10</button>
-                    <button onclick="addMonto(50)" class="bg-blue-500 active:bg-blue-700 text-white p-4 rounded-lg text-xl shadow transition-colors">+$50</button>
+                    <button onclick="addMonto(80)" class="col-span-2 bg-blue-600 active:bg-blue-800 text-white p-4 rounded-lg text-2xl font-bold shadow">+$80</button>
+                    <button onclick="addMonto(10)" class="bg-blue-500 active:bg-blue-700 text-white p-4 rounded-lg text-xl shadow">+$10</button>
+                    <button onclick="addMonto(50)" class="bg-blue-500 active:bg-blue-700 text-white p-4 rounded-lg text-xl shadow">+$50</button>
                 </div>
                 <div class="grid grid-cols-4 gap-2 mb-2">
                     <button onclick="addMonto(1)" class="bg-gray-200 active:bg-gray-400 text-gray-800 p-3 rounded-lg font-bold shadow">+$1</button>
@@ -85,7 +73,6 @@
                 </div>
             </div>
 
-            <!-- Tipo de Movimiento -->
             <div class="bg-white p-4 rounded-xl shadow">
                 <label class="font-bold text-gray-700 mb-2 block">Tipo de Movimiento</label>
                 <div class="grid grid-cols-2 gap-3" id="typeSelectors">
@@ -96,20 +83,24 @@
                 </div>
             </div>
 
-            <!-- Botón de Registro -->
             <button onclick="registrarMovimiento()" class="w-full bg-gray-900 active:bg-black text-white p-5 rounded-xl text-2xl font-black shadow-xl mb-6">REGISTRAR</button>
         </div>
 
-        <!-- PESTAÑA 2: RESUMEN -->
+        <!-- RESUMEN BIDIRECCIONAL -->
         <div id="view-resumen" class="hidden pb-20">
             <div class="flex flex-col gap-4">
+                <button onclick="forceSync()" class="w-full bg-blue-600 active:bg-blue-800 text-white p-4 rounded-xl font-bold shadow flex justify-center items-center gap-2">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    Sincronizar con Google Sheets
+                </button>
+
                 <div class="flex justify-between items-center bg-white p-4 rounded-xl shadow">
                     <div>
-                        <h2 class="text-xl font-bold text-gray-800">Saldos Actuales</h2>
-                        <p class="text-sm text-gray-500">Calculado localmente</p>
+                        <h2 class="text-xl font-bold text-gray-800">Saldos (App + Sheets)</h2>
+                        <p class="text-xs text-gray-500">Muestra datos de Google + no sincronizados.</p>
                     </div>
-                    <button onclick="exportToExcel()" class="bg-green-600 active:bg-green-800 text-white px-4 py-2 rounded-lg font-bold shadow flex items-center gap-2 transition-colors">
-                        <span>Descargar Excel</span>
+                    <button onclick="exportToExcel()" class="bg-green-600 text-white px-3 py-2 rounded-lg font-bold shadow flex items-center gap-2 text-sm">
+                        Descargar Excel
                     </button>
                 </div>
 
@@ -124,22 +115,19 @@
                                     <th class="p-3 font-bold text-right">Saldo Final</th>
                                 </tr>
                             </thead>
-                            <tbody id="summaryBody" class="text-sm">
-                            </tbody>
+                            <tbody id="summaryBody" class="text-sm"></tbody>
                         </table>
                     </div>
                 </div>
-
-                <button onclick="forceSync()" class="w-full bg-blue-600 active:bg-blue-800 text-white p-4 rounded-xl font-bold shadow mt-4 transition-colors">Sincronizar a Google Sheets</button>
             </div>
         </div>
-
     </main>
 
     <!-- Modales -->
     <div id="workerModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50 p-4">
         <div class="bg-white p-6 rounded-xl w-full max-w-sm shadow-2xl">
-            <h3 class="font-bold text-lg mb-4">Agregar Trabajador</h3>
+            <h3 class="font-bold text-lg mb-4">Agregar Trabajador Local</h3>
+            <p class="text-xs text-gray-500 mb-4">También puedes agregarlos directamente en Google Sheets y darle a "Sincronizar".</p>
             <input type="text" id="newWorkerName" placeholder="Nombre completo o Apodo" class="w-full p-3 border rounded-lg mb-4 text-lg">
             
             <div class="flex justify-between items-center mb-2">
@@ -166,32 +154,34 @@
         </div>
     </div>
 
-    <!-- Toast Notification -->
-    <div id="toast" class="fixed bottom-5 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full shadow-2xl transition-opacity duration-300 opacity-0 pointer-events-none z-50 flex items-center gap-2 font-bold">
+    <div id="toast" class="fixed bottom-5 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full shadow-2xl transition-opacity duration-300 opacity-0 pointer-events-none z-50 flex items-center gap-2 font-bold text-center w-max max-w-xs">
         <span id="toastMsg">Mensaje</span>
     </div>
 
     <script>
-        const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbykCvmy9nvld_E_b4C14nNkniKhtiwNQMfo3Q-0yTapB41FBQyULIEhlt9IhpSx2xvM/exec'; 
+        // PEGA AQUÍ TU URL
+        const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbymMtKgnX-1HgY72Qhe75llPNzM0XXRco6Vy9i46JHIyEwx-pffCRyk1NwNuENWhmI/exec'; 
 
         let db;
         let currentMonto = 0;
-        let currentWorkerId = null;
+        let currentWorkerName = null;
         let currentType = null;
         let workers = [];
         let squads = [];
 
-        const request = indexedDB.open('ComidasDB', 1);
+        // NUEVA VERSIÓN 2 DE LA DB: Las llaves ahora son los Nombres para poder sincronizar perfecto con Sheets
+        const request = indexedDB.open('ComidasDB', 2); 
         
         request.onupgradeneeded = (e) => {
             db = e.target.result;
-            if (!db.objectStoreNames.contains('workers')) db.createObjectStore('workers', { keyPath: 'id', autoIncrement: true });
-            if (!db.objectStoreNames.contains('squads')) db.createObjectStore('squads', { keyPath: 'id', autoIncrement: true });
-            if (!db.objectStoreNames.contains('transactions')) {
-                const txStore = db.createObjectStore('transactions', { keyPath: 'id', autoIncrement: true });
-                txStore.createIndex('synced', 'synced', { unique: false });
-                txStore.createIndex('workerId', 'workerId', { unique: false });
-            }
+            if (db.objectStoreNames.contains('workers')) db.deleteObjectStore('workers');
+            if (db.objectStoreNames.contains('squads')) db.deleteObjectStore('squads');
+            if (db.objectStoreNames.contains('transactions')) db.deleteObjectStore('transactions');
+
+            db.createObjectStore('workers', { keyPath: 'name' }); 
+            db.createObjectStore('squads', { keyPath: 'name' });
+            const txStore = db.createObjectStore('transactions', { keyPath: 'id', autoIncrement: true });
+            txStore.createIndex('synced', 'synced', { unique: false });
         };
 
         request.onsuccess = (e) => {
@@ -200,33 +190,18 @@
             loadWorkers();
             updateSyncBadge();
             checkConnection();
-            buildSummaryTable();
         };
 
-        // ZONA HORARIA TIJUANA (Obligatoria para todas las operaciones de tiempo)
         function getTijuanaTimestamp() {
             const now = new Date();
             const formatter = new Intl.DateTimeFormat('es-MX', {
-                timeZone: 'America/Tijuana',
-                year: 'numeric', month: '2-digit', day: '2-digit',
-                hour: '2-digit', minute: '2-digit', second: '2-digit',
-                weekday: 'long', hour12: false
+                timeZone: 'America/Tijuana', year: 'numeric', month: '2-digit', day: '2-digit',
+                hour: '2-digit', minute: '2-digit', second: '2-digit', weekday: 'long', hour12: false
             });
             const parts = formatter.formatToParts(now);
-            const p = {};
-            parts.forEach(({type, value}) => p[type] = value);
-            
-            // "lunes", "martes", etc.
-            let day = p.weekday.toLowerCase(); 
-            // Eliminar acentos para normalizar (miércoles -> miercoles, sábado -> sabado)
-            day = day.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-
-            return {
-                date: `${p.year}-${p.month}-${p.day}`,
-                time: `${p.hour}:${p.minute}:${p.second}`,
-                day: day, // normalizado para el excel
-                rawTime: now.getTime()
-            };
+            const p = {}; parts.forEach(({type, value}) => p[type] = value);
+            let day = p.weekday.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            return { date: `${p.year}-${p.month}-${p.day}`, time: `${p.hour}:${p.minute}:${p.second}`, day: day, rawTime: now.getTime() };
         }
 
         function switchTab(tab) {
@@ -241,7 +216,7 @@
             const toast = document.getElementById('toast');
             document.getElementById('toastMsg').innerText = msg;
             toast.classList.remove('opacity-0');
-            setTimeout(() => toast.classList.add('opacity-0'), 2500);
+            setTimeout(() => toast.classList.add('opacity-0'), 3000);
         }
 
         function addMonto(val) { currentMonto = Math.max(0, currentMonto + val); updateMontoDisplay(); }
@@ -255,14 +230,12 @@
                 btn.classList.add('border-transparent');
             });
             const typeClass = type === 'Soda/Extra' ? 'SodaExtra' : type;
-            const activeBtn = document.getElementById(`btn-${typeClass}`);
-            activeBtn.classList.remove('border-transparent');
-            activeBtn.classList.add('border-gray-800', 'shadow-inner', 'ring-4', 'ring-gray-300');
+            document.getElementById(`btn-${typeClass}`).classList.remove('border-transparent');
+            document.getElementById(`btn-${typeClass}`).classList.add('border-gray-800', 'shadow-inner', 'ring-4', 'ring-gray-300');
         }
 
         function loadSquads() {
-            const tx = db.transaction('squads', 'readonly');
-            tx.objectStore('squads').getAll().onsuccess = (e) => {
+            db.transaction('squads').objectStore('squads').getAll().onsuccess = (e) => {
                 squads = e.target.result;
                 const select = document.getElementById('newWorkerSquad');
                 select.innerHTML = '<option value="" disabled selected>Selecciona cuadrilla</option>';
@@ -274,20 +247,15 @@
             const name = document.getElementById('newSquadName').value.trim();
             if (!name) return;
             const tx = db.transaction('squads', 'readwrite');
-            tx.objectStore('squads').add({ name });
-            tx.oncomplete = () => {
-                loadSquads();
-                closeModal('squadModal');
-                document.getElementById('newSquadName').value = '';
-                showToast('Cuadrilla agregada');
-            };
+            tx.objectStore('squads').put({ name: name }); // put para sobrescribir
+            tx.oncomplete = () => { loadSquads(); closeModal('squadModal'); document.getElementById('newSquadName').value = ''; showToast('Cuadrilla guardada'); };
         }
 
         function loadWorkers() {
-            const tx = db.transaction('workers', 'readonly');
-            tx.objectStore('workers').getAll().onsuccess = (e) => {
+            db.transaction('workers').objectStore('workers').getAll().onsuccess = (e) => {
                 workers = e.target.result;
                 renderWorkersUI();
+                if(document.getElementById('view-resumen').classList.contains('hidden') === false) buildSummaryTable();
             };
         }
 
@@ -295,18 +263,19 @@
             const name = document.getElementById('newWorkerName').value.trim();
             const squad = document.getElementById('newWorkerSquad').value;
             if (!name || !squad) { showToast('⚠️ Llena nombre y cuadrilla'); return; }
-            const tx = db.transaction('workers', 'readwrite');
-            tx.objectStore('workers').add({ name, squad });
-            tx.oncomplete = () => {
-                loadWorkers();
-                closeModal('workerModal');
-                document.getElementById('newWorkerName').value = '';
-                document.getElementById('newWorkerSquad').value = '';
-                showToast('Trabajador guardado');
+            
+            const newWorker = { 
+                name: name, squad: squad, 
+                totalSemana:0, totalExtras:0, abonado:0, saldo:0, faltanteAnt:0, abonoAnt:0,
+                lunes:{des:0,com:0,soda:0}, martes:{des:0,com:0,soda:0}, miercoles:{des:0,com:0,soda:0},
+                jueves:{des:0,com:0,soda:0}, viernes:{des:0,com:0,soda:0}, sabado:{des:0,com:0,soda:0}
             };
+
+            const tx = db.transaction('workers', 'readwrite');
+            tx.objectStore('workers').put(newWorker);
+            tx.oncomplete = () => { loadWorkers(); closeModal('workerModal'); document.getElementById('newWorkerName').value = ''; showToast('Trabajador local guardado'); };
         }
 
-        // RENDERIZADO VISUAL DE TRABAJADORES (Por Cuadrillas)
         function renderWorkersUI() {
             const query = document.getElementById('searchInput').value.toLowerCase();
             const container = document.getElementById('workerGrid');
@@ -319,249 +288,178 @@
                 grouped[w.squad].push(w);
             });
 
-            if (Object.keys(grouped).length === 0) {
-                container.innerHTML = '<p class="text-gray-400 text-center py-4">No hay trabajadores.</p>';
-                return;
-            }
+            if (Object.keys(grouped).length === 0) { container.innerHTML = '<p class="text-gray-400 text-center py-4">Sin datos. Sincroniza o agrega uno.</p>'; return; }
 
             for(const [squad, squadWorkers] of Object.entries(grouped)) {
-                const section = document.createElement('div');
-                section.className = 'mb-4';
-                
-                // HTML de la sección de cuadrilla
-                let html = `
-                    <div class="sticky top-0 bg-white bg-opacity-90 py-1 mb-2 border-b-2 border-gray-200 z-10">
-                        <h4 class="font-black text-gray-400 uppercase text-xs tracking-wider">${squad}</h4>
-                    </div>
-                    <div class="grid grid-cols-2 gap-2">
-                `;
-                
-                // Botones de trabajadores
+                let html = `<div class="mb-4"><div class="sticky top-0 bg-white bg-opacity-90 py-1 mb-2 border-b-2 border-gray-200 z-10"><h4 class="font-black text-gray-400 uppercase text-xs tracking-wider">${squad}</h4></div><div class="grid grid-cols-2 gap-2">`;
                 squadWorkers.forEach(w => {
-                    html += `
-                        <button onclick="selectWorker(${w.id})" class="bg-gray-50 border border-gray-200 p-3 rounded-xl text-left shadow-sm active:bg-blue-100 transition-colors flex flex-col justify-center min-h-[60px]">
-                            <span class="font-bold text-gray-800 text-sm leading-tight">${w.name}</span>
-                        </button>
-                    `;
+                    html += `<button onclick="selectWorker('${w.name}')" class="bg-gray-50 border border-gray-200 p-3 rounded-xl text-left shadow-sm active:bg-blue-100 transition-colors flex flex-col justify-center min-h-[60px]"><span class="font-bold text-gray-800 text-sm leading-tight">${w.name}</span></button>`;
                 });
-                
-                html += `</div>`;
-                section.innerHTML = html;
-                container.appendChild(section);
+                html += `</div></div>`;
+                container.innerHTML += html;
             }
         }
 
-        function selectWorker(id) {
-            const worker = workers.find(w => w.id === id);
-            currentWorkerId = worker.id;
+        function selectWorker(name) {
+            const worker = workers.find(w => w.name === name);
+            currentWorkerName = worker.name;
             document.getElementById('swName').innerText = worker.name;
             document.getElementById('swSquad').innerText = worker.squad;
-            
             document.getElementById('searchInput').classList.add('hidden');
             document.getElementById('workerGrid').classList.add('hidden');
             document.getElementById('selectedWorkerDisplay').classList.remove('hidden');
-            document.getElementById('searchInput').value = '';
         }
 
         function clearWorkerSelection() {
-            currentWorkerId = null;
+            currentWorkerName = null;
             document.getElementById('searchInput').classList.remove('hidden');
             document.getElementById('workerGrid').classList.remove('hidden');
             document.getElementById('selectedWorkerDisplay').classList.add('hidden');
+            document.getElementById('searchInput').value = '';
             renderWorkersUI();
         }
 
         function registrarMovimiento() {
-            if (!currentWorkerId) { showToast('⚠️ Selecciona un trabajador'); return; }
-            if (currentMonto <= 0) { showToast('⚠️ El monto debe ser mayor a $0'); return; }
-            if (!currentType) { showToast('⚠️ Selecciona el tipo'); return; }
+            if (!currentWorkerName) return showToast('⚠️ Selecciona un trabajador');
+            if (currentMonto <= 0) return showToast('⚠️ El monto debe ser mayor a $0');
+            if (!currentType) return showToast('⚠️ Selecciona el tipo');
 
-            const worker = workers.find(w => w.id === currentWorkerId);
+            const worker = workers.find(w => w.name === currentWorkerName);
             const tijuana = getTijuanaTimestamp();
 
             const txData = {
-                workerId: worker.id,
-                workerName: worker.name,
-                squadName: worker.squad,
-                amount: currentMonto,
-                type: currentType,
-                date: tijuana.date,
-                time: tijuana.time,
-                day: tijuana.day, 
-                timestamp: tijuana.rawTime,
-                synced: 0
+                workerName: worker.name, squadName: worker.squad, amount: currentMonto, type: currentType,
+                date: tijuana.date, time: tijuana.time, day: tijuana.day, timestamp: tijuana.rawTime, synced: 0
             };
 
             const tx = db.transaction('transactions', 'readwrite');
             tx.objectStore('transactions').add(txData);
             tx.oncomplete = () => {
-                showToast(`✅ $${currentMonto} guardado para ${worker.name}`);
-                clearMonto();
-                clearWorkerSelection();
-                updateSyncBadge();
+                showToast(`✅ $${currentMonto} guardado`);
+                clearMonto(); clearWorkerSelection(); updateSyncBadge();
                 if(navigator.onLine) forceSync();
             };
         }
 
-        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
-        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-
+        // --- CONSTRUIR RESUMEN: Datos de Sheets + Transacciones NO sincronizadas ---
         function buildSummaryTable() {
             if (!db) return;
-            const tx = db.transaction('transactions', 'readonly');
-            tx.objectStore('transactions').getAll().onsuccess = (e) => {
-                const transactions = e.target.result;
+            db.transaction('transactions').objectStore('transactions').index('synced').getAll(0).onsuccess = (e) => {
+                const pendingTxs = e.target.result;
                 const tbody = document.getElementById('summaryBody');
                 tbody.innerHTML = '';
                 
-                const summary = {};
-                workers.forEach(w => summary[w.id] = { name: w.name, squad: w.squad, consumido: 0, abonado: 0 });
+                // Clonar datos de Sheets
+                const summary = JSON.parse(JSON.stringify(workers)); 
 
-                transactions.forEach(t => {
-                    if (summary[t.workerId]) {
-                        if (t.type === 'Abono') summary[t.workerId].abonado += t.amount;
-                        else summary[t.workerId].consumido += t.amount;
+                // Sumarle lo que aún no se envía a internet
+                pendingTxs.forEach(t => {
+                    let w = summary.find(x => x.name === t.workerName);
+                    if (w) {
+                        if (t.type === 'Abono') w.abonado += t.amount;
+                        else w.totalSemana += t.amount; // Simplificación visual para la tabla
+                        w.saldo = (w.totalSemana + w.totalExtras + w.faltanteAnt) - (w.abonado + w.abonoAnt);
                     }
                 });
 
-                Object.values(summary).forEach(row => {
-                    if (row.consumido > 0 || row.abonado > 0) {
-                        const saldo = row.consumido - row.abonado;
-                        const tr = document.createElement('tr');
-                        tr.className = "border-b";
-                        tr.innerHTML = `
-                            <td class="p-3"><div class="font-bold text-gray-800">${row.name}</div><div class="text-xs text-gray-500">${row.squad}</div></td>
-                            <td class="p-3 text-right text-red-600 font-semibold">$${row.consumido}</td>
-                            <td class="p-3 text-right text-green-600 font-semibold">$${row.abonado}</td>
-                            <td class="p-3 text-right font-black ${saldo > 0 ? 'text-red-700' : saldo < 0 ? 'text-green-700' : 'text-gray-800'}">$${saldo}</td>
+                summary.forEach(row => {
+                    if (row.totalSemana > 0 || row.totalExtras > 0 || row.abonado > 0 || row.saldo !== 0) {
+                        tbody.innerHTML += `
+                            <tr class="border-b">
+                                <td class="p-3"><div class="font-bold text-gray-800">${row.name}</div><div class="text-xs text-gray-500">${row.squad}</div></td>
+                                <td class="p-3 text-right text-red-600 font-semibold">$${row.totalSemana + row.totalExtras}</td>
+                                <td class="p-3 text-right text-green-600 font-semibold">$${row.abonado}</td>
+                                <td class="p-3 text-right font-black ${row.saldo > 0 ? 'text-red-700' : row.saldo < 0 ? 'text-green-700' : 'text-gray-800'}">$${row.saldo}</td>
+                            </tr>
                         `;
-                        tbody.appendChild(tr);
                     }
                 });
             };
         }
 
-        // EXPORTACIÓN A EXCEL IDÉNTICA A LA IMAGEN
-        function exportToExcel() {
-            const tx = db.transaction('transactions', 'readonly');
-            tx.objectStore('transactions').getAll().onsuccess = (e) => {
-                const data = e.target.result;
+        // SINCRONIZACIÓN MAESTRA BIDIRECCIONAL
+        async function forceSync() {
+            if (!navigator.onLine) return showToast('Sin internet');
+            if(WEBHOOK_URL === 'URL_DE_TU_WEBHOOK_AQUI') return showToast('⚠️ Falta configurar URL');
+
+            showToast('Conectando con Google Sheets...');
+            
+            db.transaction('transactions').objectStore('transactions').index('synced').getAll(0).onsuccess = async (e) => {
+                const pending = e.target.result;
                 
-                // Construir base de datos de totales por trabajador
-                const report = {};
-                workers.forEach(w => {
-                    report[w.id] = {
-                        name: w.name,
-                        squad: w.squad,
-                        faltanteAnt: 0, // Por ahora 0, para implementar saldo pendiente histórico a futuro
-                        abonoAnt: 0,
-                        lunes: { des: 0, com: 0, soda: 0 },
-                        martes: { des: 0, com: 0, soda: 0 },
-                        miercoles: { des: 0, com: 0, soda: 0 }, // Sin acento por la normalización
-                        jueves: { des: 0, com: 0, soda: 0 },
-                        viernes: { des: 0, com: 0, soda: 0 },
-                        sabado: { des: 0, com: 0, soda: 0 },
-                        totalSemana: 0,
-                        totalExtras: 0,
-                        abono: 0
-                    };
-                });
-
-                // Llenar datos basándose en el día extraído con hora Tijuana
-                data.forEach(t => {
-                    if(report[t.workerId] && report[t.workerId][t.day] !== undefined) {
-                        if(t.type === 'Desayuno') {
-                            report[t.workerId][t.day].des += t.amount;
-                            report[t.workerId].totalSemana += t.amount;
-                        } else if (t.type === 'Comida') {
-                            report[t.workerId][t.day].com += t.amount;
-                            report[t.workerId].totalSemana += t.amount;
-                        } else if (t.type === 'Soda/Extra') {
-                            report[t.workerId][t.day].soda += t.amount;
-                            report[t.workerId].totalExtras += t.amount;
-                        } else if (t.type === 'Abono') {
-                            report[t.workerId].abono += t.amount;
-                        }
-                    }
-                });
-
-                // Ordenar por Cuadrilla
-                const sortedWorkers = Object.values(report).sort((a, b) => a.squad.localeCompare(b.squad));
-
-                // Formato idéntico al Excel de la imagen
-                const wsData = [];
-                
-                // Fila 1: Encabezados Principales
-                wsData.push([
-                    '#', 'NOMBRE / APODO', 'FALTANTE ANT.', 'ABONO ANT.', 'TOTAL SEMANA ($)', 'TOTAL EXTRAS', 'ABONÓ / PAGÓ ($)', 'RESTA / SALDO ($)',
-                    'LUNES', '', '', 'MARTES', '', '', 'MIÉRCOLES', '', '', 'JUEVES', '', '', 'VIERNES', '', '', 'SÁBADO', '', ''
-                ]);
-
-                // Fila 2: Sub-encabezados de días
-                wsData.push([
-                    '', '', '', '', '', '', '', '',
-                    'DES', 'COM', 'SODA/EXTRA', 'DES', 'COM', 'SODA/EXTRA', 'DES', 'COM', 'SODA/EXTRA', 
-                    'DES', 'COM', 'SODA/EXTRA', 'DES', 'COM', 'SODA/EXTRA', 'DES', 'COM', 'SODA/EXTRA'
-                ]);
-
-                // Filas de Datos
-                let index = 1;
-                sortedWorkers.forEach(w => {
-                    const saldoFinal = (w.totalSemana + w.totalExtras + w.faltanteAnt) - (w.abono + w.abonoAnt);
+                try {
+                    const response = await fetch(WEBHOOK_URL, { 
+                        method: 'POST', redirect: 'follow',
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify({ transactions: pending }) 
+                    });
                     
-                    // Solo exportar si tuvo actividad
-                    if(w.totalSemana > 0 || w.totalExtras > 0 || w.abono > 0 || w.faltanteAnt > 0) {
-                        wsData.push([
-                            index++, 
-                            w.name, 
-                            w.faltanteAnt, 
-                            w.abonoAnt, 
-                            w.totalSemana, 
-                            w.totalExtras, 
-                            w.abono, 
-                            saldoFinal,
-                            w.lunes.des || '', w.lunes.com || '', w.lunes.soda || '',
-                            w.martes.des || '', w.martes.com || '', w.martes.soda || '',
-                            w.miercoles.des || '', w.miercoles.com || '', w.miercoles.soda || '',
-                            w.jueves.des || '', w.jueves.com || '', w.jueves.soda || '',
-                            w.viernes.des || '', w.viernes.com || '', w.viernes.soda || '',
-                            w.sabado.des || '', w.sabado.com || '', w.sabado.soda || ''
-                        ]);
+                    const result = await response.json();
+                    
+                    if (result.status === 'success') {
+                        // 1. Marcar transacciones locales como sincronizadas
+                        const txUpdate = db.transaction(['transactions', 'workers', 'squads'], 'readwrite');
+                        const storeTx = txUpdate.objectStore('transactions');
+                        pending.forEach(p => { p.synced = 1; storeTx.put(p); });
+
+                        // 2. REEMPLAZAR LA BASE DE DATOS LOCAL CON LA DE GOOGLE SHEETS
+                        const storeWorkers = txUpdate.objectStore('workers');
+                        const storeSquads = txUpdate.objectStore('squads');
+                        
+                        storeWorkers.clear();
+                        storeSquads.clear();
+                        
+                        let uniqueSquads = new Set();
+                        result.workers.forEach(w => {
+                            storeWorkers.put(w);
+                            uniqueSquads.add(w.squad);
+                        });
+
+                        uniqueSquads.forEach(sq => storeSquads.put({ name: sq }));
+
+                        txUpdate.oncomplete = () => { 
+                            showToast('✅ Base de datos actualizada con Sheets'); 
+                            updateSyncBadge();
+                            loadWorkers(); // Recarga la UI
+                        };
                     }
-                });
-
-                const ws = XLSX.utils.aoa_to_sheet(wsData);
-
-                // Combinar celdas (Merges) para que el Excel salga formateado nativamente
-                ws['!merges'] = [
-                    { s: { r: 0, c: 0 }, e: { r: 1, c: 0 } }, // #
-                    { s: { r: 0, c: 1 }, e: { r: 1, c: 1 } }, // NOMBRE
-                    { s: { r: 0, c: 2 }, e: { r: 1, c: 2 } }, // FALTANTE ANT
-                    { s: { r: 0, c: 3 }, e: { r: 1, c: 3 } }, // ABONO ANT
-                    { s: { r: 0, c: 4 }, e: { r: 1, c: 4 } }, // TOTAL SEMANA
-                    { s: { r: 0, c: 5 }, e: { r: 1, c: 5 } }, // TOTAL EXTRAS
-                    { s: { r: 0, c: 6 }, e: { r: 1, c: 6 } }, // ABONO
-                    { s: { r: 0, c: 7 }, e: { r: 1, c: 7 } }, // RESTA
-                    { s: { r: 0, c: 8 }, e: { r: 0, c: 10 } }, // LUNES
-                    { s: { r: 0, c: 11 }, e: { r: 0, c: 13 } }, // MARTES
-                    { s: { r: 0, c: 14 }, e: { r: 0, c: 16 } }, // MIERCOLES
-                    { s: { r: 0, c: 17 }, e: { r: 0, c: 19 } }, // JUEVES
-                    { s: { r: 0, c: 20 }, e: { r: 0, c: 22 } }, // VIERNES
-                    { s: { r: 0, c: 23 }, e: { r: 0, c: 25 } }  // SABADO
-                ];
-
-                const wb = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(wb, ws, "Control_Semanal");
-                const filename = `Control_${getTijuanaTimestamp().date}.xlsx`;
-                XLSX.writeFile(wb, filename);
-                showToast('✅ Excel formateado descargado');
+                } catch (err) { 
+                    showToast('❌ Error de red');
+                }
             };
+        }
+
+        // Exportar a Excel local usando los datos traídos desde Sheets
+        function exportToExcel() {
+            const sortedWorkers = [...workers].sort((a, b) => a.squad.localeCompare(b.squad));
+            const wsData = [
+                ['#', 'NOMBRE / APODO', 'CUADRILLA', 'FALTANTE ANT.', 'ABONO ANT.', 'TOTAL SEMANA ($)', 'TOTAL EXTRAS', 'ABONÓ / PAGÓ ($)', 'RESTA / SALDO ($)', 'LUNES', '', '', 'MARTES', '', '', 'MIÉRCOLES', '', '', 'JUEVES', '', '', 'VIERNES', '', '', 'SÁBADO', '', ''],
+                ['', '', '', '', '', '', '', '', '', 'DES', 'COM', 'SODA/EX', 'DES', 'COM', 'SODA/EX', 'DES', 'COM', 'SODA/EX', 'DES', 'COM', 'SODA/EX', 'DES', 'COM', 'SODA/EX', 'DES', 'COM', 'SODA/EX']
+            ];
+
+            let index = 1;
+            sortedWorkers.forEach(w => {
+                if(w.totalSemana > 0 || w.totalExtras > 0 || w.abonado > 0 || w.faltanteAnt > 0 || w.saldo > 0) {
+                    wsData.push([
+                        index++, w.name, w.squad, w.faltanteAnt, w.abonoAnt, w.totalSemana, w.totalExtras, w.abonado, w.saldo,
+                        w.lunes.des||'', w.lunes.com||'', w.lunes.soda||'', w.martes.des||'', w.martes.com||'', w.martes.soda||'',
+                        w.miercoles.des||'', w.miercoles.com||'', w.miercoles.soda||'', w.jueves.des||'', w.jueves.com||'', w.jueves.soda||'',
+                        w.viernes.des||'', w.viernes.com||'', w.viernes.soda||'', w.sabado.des||'', w.sabado.com||'', w.sabado.soda||''
+                    ]);
+                }
+            });
+
+            const ws = XLSX.utils.aoa_to_sheet(wsData);
+            ws['!merges'] = [{s:{r:0,c:0},e:{r:1,c:0}}, {s:{r:0,c:1},e:{r:1,c:1}}, {s:{r:0,c:2},e:{r:1,c:2}}, {s:{r:0,c:3},e:{r:1,c:3}}, {s:{r:0,c:4},e:{r:1,c:4}}, {s:{r:0,c:5},e:{r:1,c:5}}, {s:{r:0,c:6},e:{r:1,c:6}}, {s:{r:0,c:7},e:{r:1,c:7}}, {s:{r:0,c:8},e:{r:1,c:8}}, {s:{r:0,c:9},e:{r:0,c:11}}, {s:{r:0,c:12},e:{r:0,c:14}}, {s:{r:0,c:15},e:{r:0,c:17}}, {s:{r:0,c:18},e:{r:0,c:20}}, {s:{r:0,c:21},e:{r:0,c:23}}, {s:{r:0,c:24},e:{r:0,c:26}}];
+
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Control");
+            XLSX.writeFile(wb, `Control_${getTijuanaTimestamp().date}.xlsx`);
         }
 
         function updateSyncBadge() {
             if (!db) return;
-            const tx = db.transaction('transactions', 'readonly');
-            tx.objectStore('transactions').index('synced').getAll(0).onsuccess = (e) => {
+            db.transaction('transactions').objectStore('transactions').index('synced').getAll(0).onsuccess = (e) => {
                 const count = e.target.result.length;
                 const badge = document.getElementById('syncBadge');
                 if (count > 0) { badge.innerText = `${count} Pendientes`; badge.classList.remove('hidden'); } 
@@ -571,46 +469,13 @@
 
         function checkConnection() {
             const dot = document.getElementById('statusDot');
-            const txt = document.getElementById('statusText');
-            if (navigator.onLine) {
-                dot.className = 'w-3 h-3 rounded-full bg-green-500';
-                txt.innerText = 'En Línea';
-                updateSyncBadge();
-            } else {
-                dot.className = 'w-3 h-3 rounded-full bg-red-500';
-                txt.innerText = 'Offline';
-            }
+            if (navigator.onLine) { dot.className = 'w-3 h-3 rounded-full bg-green-500'; document.getElementById('statusText').innerText = 'En Línea'; updateSyncBadge(); } 
+            else { dot.className = 'w-3 h-3 rounded-full bg-red-500'; document.getElementById('statusText').innerText = 'Offline'; }
         }
-
         window.addEventListener('online', () => { checkConnection(); forceSync(); });
         window.addEventListener('offline', checkConnection);
 
-        async function forceSync() {
-            if (!navigator.onLine) return showToast('Sin internet');
-            if(WEBHOOK_URL === 'URL_DE_TU_WEBHOOK_AQUI') return;
-
-            const tx = db.transaction('transactions', 'readonly');
-            tx.objectStore('transactions').index('synced').getAll(0).onsuccess = async (e) => {
-                const pending = e.target.result;
-                if (pending.length === 0) return;
-
-                showToast(`Sincronizando ${pending.length}...`);
-                try {
-                    const response = await fetch(WEBHOOK_URL, { method: 'POST', body: JSON.stringify({ transactions: pending }) });
-                    const result = await response.json();
-                    if (result.status === 'success') {
-                        const txUpdate = db.transaction('transactions', 'readwrite');
-                        const store = txUpdate.objectStore('transactions');
-                        pending.forEach(p => { p.synced = 1; store.put(p); });
-                        txUpdate.oncomplete = () => { showToast('✅ Sincronizado'); updateSyncBadge(); };
-                    }
-                } catch (err) { showToast('❌ Error de red'); }
-            };
-        }
-
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js'));
-        }
+        if ('serviceWorker' in navigator) { window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js')); }
     </script>
 </body>
 </html>
