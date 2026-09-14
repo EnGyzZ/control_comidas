@@ -3,459 +3,676 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
-<meta name="theme-color" content="#111827"/>
+<meta name="theme-color" content="#6B7280"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
 <title>Obra Comidas</title>
 <link rel="manifest" href="manifest.json"/>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 <style>
-  * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
-  body { overscroll-behavior: none; }
-  .tab-active { background: #2563eb; color: #fff; }
-  .tab-inactive { background: #1f2937; color: #9ca3af; }
-  .btn-money {
-    font-size: 1.05rem; font-weight: 700;
-    border-radius: 0.75rem; padding: 0.9rem 0.4rem;
-    background: #1f2937; color: #f9fafb;
-    border: 1.5px solid #374151;
-    transition: background .12s, transform .08s;
-    user-select: none;
-  }
-  .btn-money:active { background: #2563eb; transform: scale(.95); }
-  .btn-main {
-    border-radius: 0.75rem; padding: 0.85rem 1rem;
-    font-weight: 700; font-size: 1rem;
-    transition: background .12s, transform .08s;
-    user-select: none;
-  }
-  .btn-main:active { transform: scale(.96); }
-  .tipo-btn {
-    border-radius: 0.6rem; padding: 0.65rem 0.5rem;
-    font-weight: 600; font-size: .85rem; text-align: center;
-    border: 2px solid #374151; background: #1f2937; color: #9ca3af;
-    transition: all .12s; user-select: none; cursor: pointer;
-  }
-  .tipo-btn.selected { border-color: #2563eb; background: #1e3a5f; color: #93c5fd; }
-  input, select {
-    background: #1f2937 !important; color: #f9fafb !important;
-    border: 1.5px solid #374151 !important;
-    border-radius: 0.6rem !important; padding: 0.7rem 0.9rem !important;
-    font-size: 1rem !important; outline: none !important;
-    width: 100%;
-  }
-  input:focus, select:focus { border-color: #2563eb !important; }
-  .worker-row { border-bottom: 1px solid #1f2937; }
-  .worker-row:last-child { border-bottom: none; }
-  .badge { border-radius: 0.4rem; padding: 2px 8px; font-size: .72rem; font-weight: 700; }
-  .badge-red { background: #7f1d1d; color: #fca5a5; }
-  .badge-green { background: #14532d; color: #86efac; }
-  .badge-blue { background: #1e3a5f; color: #93c5fd; }
-  ::-webkit-scrollbar { width: 4px; }
-  ::-webkit-scrollbar-track { background: #111827; }
-  ::-webkit-scrollbar-thumb { background: #374151; border-radius: 2px; }
-  .slide-up { animation: slideUp .18s ease; }
-  @keyframes slideUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
-  .toast {
-    position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
-    background: #1f2937; color: #f9fafb; padding: 10px 22px;
-    border-radius: 999px; font-size: .9rem; font-weight: 600;
-    border: 1px solid #374151; z-index: 9999; white-space: nowrap;
-    animation: fadeInOut 2.5s forwards;
-  }
-  @keyframes fadeInOut {
-    0%{opacity:0;transform:translateX(-50%) translateY(8px)}
-    15%{opacity:1;transform:translateX(-50%) translateY(0)}
-    75%{opacity:1}
-    100%{opacity:0;transform:translateX(-50%) translateY(8px)}
-  }
-  #modal-overlay {
-    position:fixed;inset:0;background:rgba(0,0,0,.7);
-    z-index:100;display:flex;align-items:flex-end;
-    transition:opacity .2s;
-  }
-  #modal-box {
-    background:#111827;border-radius:1.2rem 1.2rem 0 0;
-    padding:1.4rem 1rem 2rem;width:100%;max-height:85vh;overflow-y:auto;
-  }
+:root {
+  --bg:       #F2F2F7;
+  --card:     #FFFFFF;
+  --card2:    #F9F9FB;
+  --border:   #E5E5EA;
+  --text:     #1C1C1E;
+  --text2:    #6D6D72;
+  --text3:    #AEAEB2;
+  --blue:     #007AFF;
+  --blue-l:   #E8F2FF;
+  --green:    #34C759;
+  --green-l:  #E8F8EC;
+  --red:      #FF3B30;
+  --red-l:    #FFF0EF;
+  --orange:   #FF9500;
+  --orange-l: #FFF5E6;
+  --purple:   #AF52DE;
+  --purple-l: #F5EEFF;
+  --shadow:   0 1px 3px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.05);
+  --shadow-lg:0 4px 16px rgba(0,0,0,0.12);
+}
+* { -webkit-tap-highlight-color: transparent; box-sizing: border-box; margin:0; padding:0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  min-height: 100vh;
+  max-width: 540px;
+  margin: 0 auto;
+  overscroll-behavior: none;
+}
+/* ─ CARDS ─ */
+.card {
+  background: var(--card);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.card-section {
+  background: var(--card);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  padding: 14px 16px;
+}
+/* ─ TIPO CHIP ─ */
+.tipo-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border-radius: 14px;
+  padding: 12px 8px;
+  border: 2px solid var(--border);
+  background: var(--card);
+  color: var(--text2);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .15s;
+  user-select: none;
+  min-height: 70px;
+}
+.tipo-chip .icon { font-size: 1.6rem; line-height: 1; }
+.tipo-chip.active-D { border-color: #FF9500; background: var(--orange-l); color: #CC7700; }
+.tipo-chip.active-C { border-color: var(--blue); background: var(--blue-l); color: #005CC5; }
+.tipo-chip.active-S { border-color: var(--purple); background: var(--purple-l); color: #8A3DB2; }
+.tipo-chip.active-A { border-color: var(--green); background: var(--green-l); color: #25A244; }
+/* ─ MONEY BUTTONS ─ */
+.monto-display {
+  font-size: 2.8rem;
+  font-weight: 800;
+  letter-spacing: -1px;
+  color: var(--text);
+  text-align: center;
+  padding: 12px 0 8px;
+}
+.monto-sub {
+  font-size: 0.78rem;
+  color: var(--text2);
+  text-align: center;
+  min-height: 18px;
+}
+.btn-80 {
+  width: 100%;
+  padding: 18px;
+  border-radius: 14px;
+  background: var(--blue);
+  color: #fff;
+  font-size: 1.3rem;
+  font-weight: 800;
+  border: none;
+  box-shadow: 0 4px 14px rgba(0,122,255,0.35);
+  transition: all .12s;
+  cursor: pointer;
+}
+.btn-80:active { transform: scale(.97); box-shadow: none; }
+.btn-q {
+  flex: 1;
+  padding: 14px 4px;
+  border-radius: 12px;
+  border: none;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .1s;
+  user-select: none;
+}
+.btn-q:active { transform: scale(.93); }
+.btn-q-add { background: #E8F2FF; color: var(--blue); }
+.btn-q-sub { background: var(--red-l); color: var(--red); }
+/* ─ WORKER ROW ─ */
+.worker-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background .1s;
+}
+.worker-row:last-child { border-bottom: none; }
+.worker-row:active { background: var(--bg); }
+/* ─ LOG ROW ─ */
+.log-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.log-row:last-child { border-bottom: none; }
+/* ─ BADGE ─ */
+.badge {
+  border-radius: 8px;
+  padding: 3px 9px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.badge-D { background: var(--orange-l); color: #CC7700; }
+.badge-C { background: var(--blue-l);   color: #005CC5; }
+.badge-S { background: var(--purple-l); color: #8A3DB2; }
+.badge-A { background: var(--green-l);  color: #1E8B3A; }
+/* ─ INPUTS ─ */
+input[type=text], input[type=url], select {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1.5px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  font-size: 1rem;
+  font-family: inherit;
+  outline: none;
+  appearance: none;
+}
+input:focus, select:focus { border-color: var(--blue); }
+select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236D6D72' fill='none' stroke-width='1.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 36px;
+}
+/* ─ TABS ─ */
+.tab-bar {
+  display: flex;
+  background: var(--card);
+  border-top: 1px solid var(--border);
+  position: fixed;
+  bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 540px;
+  z-index: 50;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+.tab-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 4px 6px;
+  gap: 2px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: opacity .12s;
+}
+.tab-btn .ti { font-size: 1.4rem; }
+.tab-btn .tl { font-size: 0.65rem; font-weight: 600; color: var(--text3); }
+.tab-btn.active .tl { color: var(--blue); }
+.tab-btn.active .ti { filter: none; }
+/* ─ SECTION LABEL ─ */
+.sec-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text2);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  padding: 0 4px;
+  margin-bottom: 6px;
+}
+/* ─ BIG BUTTON ─ */
+.btn-primary {
+  width: 100%;
+  padding: 17px;
+  border-radius: 14px;
+  border: none;
+  background: var(--blue);
+  color: #fff;
+  font-size: 1.05rem;
+  font-weight: 700;
+  box-shadow: 0 4px 14px rgba(0,122,255,0.3);
+  cursor: pointer;
+  transition: all .12s;
+}
+.btn-primary:active { transform: scale(.97); }
+.btn-primary.green { background: var(--green); box-shadow: 0 4px 14px rgba(52,199,89,0.3); }
+.btn-primary.red   { background: var(--red);   box-shadow: 0 4px 14px rgba(255,59,48,0.3); }
+.btn-primary.gray  { background: #8E8E93; box-shadow: none; }
+/* ─ RESUMEN CARD ─ */
+.res-card {
+  background: var(--card);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.res-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid var(--border);
+}
+.res-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-bottom: 1px solid var(--border);
+}
+.res-cell {
+  padding: 10px 6px;
+  text-align: center;
+  border-right: 1px solid var(--border);
+}
+.res-cell:last-child { border-right: none; }
+.res-cell .label { font-size: 0.65rem; color: var(--text2); font-weight: 600; }
+.res-cell .val   { font-size: 0.95rem; font-weight: 800; color: var(--text); margin-top: 2px; }
+/* ─ TOAST ─ */
+#toast {
+  position: fixed;
+  bottom: 80px; left: 50%; transform: translateX(-50%) translateY(0);
+  background: rgba(28,28,30,0.92);
+  color: #fff;
+  padding: 11px 24px;
+  border-radius: 999px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  z-index: 9999;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .2s, transform .2s;
+  backdrop-filter: blur(10px);
+}
+#toast.show { opacity: 1; }
+/* ─ MODAL ─ */
+#modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 200;
+  display: flex; align-items: flex-end;
+  backdrop-filter: blur(2px);
+}
+#modal-box {
+  background: var(--card);
+  border-radius: 22px 22px 0 0;
+  padding: 8px 0 0;
+  width: 100%;
+  max-height: 88vh;
+  overflow-y: auto;
+  padding-bottom: env(safe-area-inset-bottom, 16px);
+}
+.modal-handle {
+  width: 36px; height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  margin: 0 auto 16px;
+}
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.modal-title { font-size: 1.1rem; font-weight: 700; }
+.modal-close {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: none;
+  font-size: 1rem;
+  color: var(--text2);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.modal-body { padding: 16px 20px 20px; }
+/* ─ STATUS ─ */
+.status-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+/* ─ SCROLLBAR ─ */
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+/* ─ SELECTED WORKER ─ */
+.sel-worker-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--blue-l);
+  border: 1.5px solid #B8D8FF;
+  border-radius: 14px;
+  padding: 12px 14px;
+}
+/* ─ KPI BOX ─ */
+.kpi-box {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 14px;
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+.kpi-val { font-size: 1.5rem; font-weight: 800; }
+.kpi-lbl { font-size: 0.7rem; color: var(--text2); font-weight: 600; margin-top: 2px; }
 </style>
 </head>
-<body class="bg-gray-950 text-gray-100 min-h-screen flex flex-col" style="max-width:520px;margin:0 auto;">
+
+<body>
 
 <!-- ══ STATUS BAR ══ -->
-<div id="status-bar" class="flex items-center justify-between px-4 py-2 bg-gray-900 border-b border-gray-800 text-xs">
-  <div class="flex items-center gap-1.5">
-    <span id="dot-online" class="w-2 h-2 rounded-full bg-green-400"></span>
-    <span id="lbl-online">En línea</span>
+<div style="background:var(--card);border-bottom:1px solid var(--border);padding:8px 16px;display:flex;justify-content:space-between;align-items:center;">
+  <div style="display:flex;align-items:center;gap:6px;">
+    <span class="status-dot" id="dot-status" style="background:var(--green);"></span>
+    <span style="font-size:.78rem;color:var(--text2);font-weight:600;" id="lbl-status">En línea</span>
   </div>
-  <div class="flex items-center gap-2">
-    <span id="lbl-pending" class="text-yellow-400 hidden">● Pendientes: <b id="cnt-pending">0</b></span>
-    <button id="btn-sync" class="bg-blue-600 text-white text-xs px-3 py-1 rounded-full font-semibold hidden" onclick="syncNow()">Sincronizar</button>
+  <div style="display:flex;align-items:center;gap:8px;">
+    <span id="lbl-pending" style="font-size:.75rem;color:var(--orange);font-weight:700;display:none;">⬆ <span id="cnt-pending">0</span> pendientes</span>
+    <button id="btn-sync" onclick="syncNow()" style="display:none;background:var(--blue);color:#fff;border:none;border-radius:20px;padding:4px 12px;font-size:.75rem;font-weight:700;cursor:pointer;">Sincronizar</button>
   </div>
-  <span id="lbl-date" class="text-gray-500"></span>
+  <span style="font-size:.75rem;color:var(--text3);" id="lbl-date"></span>
 </div>
 
 <!-- ══ HEADER ══ -->
-<div class="px-4 pt-3 pb-2 bg-gray-900 border-b border-gray-800">
-  <h1 class="text-lg font-bold tracking-tight text-white">🏗️ Obra Comidas</h1>
-  <p class="text-xs text-gray-500" id="lbl-week"></p>
+<div style="padding:14px 16px 10px;background:var(--card);border-bottom:1px solid var(--border);">
+  <div style="font-size:1.25rem;font-weight:800;color:var(--text);">🏗️ Obra Comidas</div>
+  <div style="font-size:.78rem;color:var(--text2);margin-top:1px;" id="lbl-week"></div>
 </div>
 
-<!-- ══ TABS ══ -->
-<div class="flex bg-gray-900 border-b border-gray-800">
-  <button class="flex-1 py-3 text-sm font-bold tab-active rounded-none" id="tab-reg" onclick="switchTab('reg')">📝 Registro</button>
-  <button class="flex-1 py-3 text-sm font-bold tab-inactive rounded-none" id="tab-res" onclick="switchTab('res')">📊 Resumen</button>
-  <button class="flex-1 py-3 text-sm font-bold tab-inactive rounded-none" id="tab-cfg" onclick="switchTab('cfg')">⚙️ Config</button>
-</div>
+<!-- ══════════ VISTAS ══════════ -->
 
-<!-- ══════════════════════════════════════════
-     PESTAÑA 1: REGISTRO
-══════════════════════════════════════════ -->
-<div id="view-reg" class="flex-1 flex flex-col gap-3 p-3 overflow-y-auto pb-20">
+<!-- ── REGISTRO ── -->
+<div id="view-reg" class="view" style="padding:14px 14px 100px;display:flex;flex-direction:column;gap:12px;">
 
-  <!-- Tipo de movimiento -->
+  <!-- Tipo (multi-selección) -->
   <div>
-    <p class="text-xs text-gray-500 mb-1.5 font-semibold uppercase tracking-wide">Tipo</p>
-    <div class="grid grid-cols-4 gap-1.5">
-      <div class="tipo-btn selected" id="tipo-Desayuno" onclick="setTipo('Desayuno')">🍳<br>Desayuno</div>
-      <div class="tipo-btn" id="tipo-Comida" onclick="setTipo('Comida')">🍽️<br>Comida</div>
-      <div class="tipo-btn" id="tipo-Soda" onclick="setTipo('Soda')">🥤<br>Soda/Extra</div>
-      <div class="tipo-btn" id="tipo-Abono" onclick="setTipo('Abono')">💵<br>Abono</div>
+    <p class="sec-label">¿Qué vas a registrar?</p>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
+      <div class="tipo-chip" id="chip-D" onclick="toggleTipo('D')">
+        <span class="icon">🍳</span><span>Desayuno</span>
+      </div>
+      <div class="tipo-chip" id="chip-C" onclick="toggleTipo('C')">
+        <span class="icon">🍽️</span><span>Comida</span>
+      </div>
+      <div class="tipo-chip" id="chip-S" onclick="toggleTipo('S')">
+        <span class="icon">🥤</span><span>Soda</span>
+      </div>
+      <div class="tipo-chip" id="chip-A" onclick="toggleTipo('A')">
+        <span class="icon">💵</span><span>Abono</span>
+      </div>
     </div>
+    <p id="tipo-hint" style="font-size:.75rem;color:var(--blue);margin-top:6px;text-align:center;min-height:16px;"></p>
   </div>
 
-  <!-- Cuadrilla + Trabajador -->
-  <div class="grid grid-cols-2 gap-2">
+  <!-- Cuadrilla + Buscar -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
     <div>
-      <p class="text-xs text-gray-500 mb-1 font-semibold uppercase tracking-wide">Cuadrilla</p>
+      <p class="sec-label">Cuadrilla</p>
       <select id="sel-cuadrilla" onchange="filterWorkers()">
         <option value="">Todas</option>
       </select>
     </div>
     <div>
-      <p class="text-xs text-gray-500 mb-1 font-semibold uppercase tracking-wide">Buscar</p>
-      <input id="inp-search" type="text" placeholder="Nombre/apodo…" oninput="filterWorkers()"/>
+      <p class="sec-label">Buscar</p>
+      <input id="inp-search" type="text" placeholder="Nombre…" oninput="filterWorkers()"/>
     </div>
   </div>
 
-  <!-- Lista de trabajadores -->
+  <!-- Trabajador -->
   <div>
-    <p class="text-xs text-gray-500 mb-1 font-semibold uppercase tracking-wide">Trabajador</p>
-    <div id="worker-list" class="bg-gray-900 rounded-xl border border-gray-800 max-h-44 overflow-y-auto">
-      <p class="text-gray-500 text-sm p-3 text-center">Cargando…</p>
-    </div>
-    <div id="worker-selected" class="mt-1.5 hidden">
-      <div class="flex items-center justify-between bg-blue-900/40 border border-blue-700 rounded-xl px-3 py-2">
+    <p class="sec-label">Trabajador</p>
+    <div id="worker-selected" style="display:none;">
+      <div class="sel-worker-bar">
         <div>
-          <span class="text-xs text-blue-400 font-semibold">Seleccionado:</span>
-          <span id="lbl-worker-name" class="text-white font-bold ml-1"></span>
-          <span id="lbl-worker-squad" class="text-xs text-gray-400 ml-1"></span>
+          <div style="font-weight:700;color:var(--text);" id="lbl-wname"></div>
+          <div style="font-size:.78rem;color:var(--text2);margin-top:1px;" id="lbl-wsquad"></div>
         </div>
-        <button onclick="clearWorker()" class="text-gray-500 text-lg leading-none">✕</button>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span id="lbl-deuda-worker" style="font-size:.8rem;font-weight:700;color:var(--orange);display:none;"></span>
+          <button onclick="clearWorker()" style="background:var(--bg);border:none;border-radius:50%;width:28px;height:28px;font-size:1rem;cursor:pointer;color:var(--text2);">✕</button>
+        </div>
       </div>
-      <p class="text-xs text-yellow-400 mt-1" id="lbl-saldo-prev"></p>
+    </div>
+    <div id="worker-list" class="card" style="max-height:200px;overflow-y:auto;display:none;">
+      <p style="padding:14px;text-align:center;color:var(--text3);font-size:.9rem;">Sin resultados</p>
+    </div>
+    <button onclick="showWorkerList()" id="btn-show-list" style="width:100%;padding:13px;border-radius:14px;border:1.5px dashed var(--border);background:transparent;color:var(--blue);font-weight:700;font-size:.95rem;cursor:pointer;margin-top:4px;">
+      + Seleccionar trabajador
+    </button>
+  </div>
+
+  <!-- Monto -->
+  <div class="card-section">
+    <div class="monto-display" id="lbl-monto">$0</div>
+    <div class="monto-sub" id="monto-sub"></div>
+    <div style="display:flex;gap:8px;margin:8px 0 10px;">
+      <button onclick="clearMonto()" style="flex:1;padding:10px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg);color:var(--text2);font-weight:600;cursor:pointer;">Limpiar</button>
+      <button onclick="setMonto(80)" style="flex:2;padding:10px;border-radius:10px;border:1.5px solid var(--blue);background:var(--blue-l);color:var(--blue);font-weight:700;cursor:pointer;">Poner $80</button>
+    </div>
+    <button class="btn-80" onclick="addMonto(80)">+ $80</button>
+    <div style="display:flex;gap:6px;margin-top:8px;">
+      <button class="btn-q btn-q-add" onclick="addMonto(1)">+$1</button>
+      <button class="btn-q btn-q-add" onclick="addMonto(5)">+$5</button>
+      <button class="btn-q btn-q-add" onclick="addMonto(10)">+$10</button>
+      <button class="btn-q btn-q-add" onclick="addMonto(50)">+$50</button>
+      <button class="btn-q btn-q-add" onclick="addMonto(100)">+$100</button>
+    </div>
+    <div style="display:flex;gap:6px;margin-top:6px;">
+      <button class="btn-q btn-q-sub" onclick="subMonto(1)">-$1</button>
+      <button class="btn-q btn-q-sub" onclick="subMonto(5)">-$5</button>
+      <button class="btn-q btn-q-sub" onclick="subMonto(10)">-$10</button>
+      <button class="btn-q btn-q-sub" onclick="subMonto(50)">-$50</button>
+      <button class="btn-q btn-q-sub" onclick="subMonto(100)">-$100</button>
     </div>
   </div>
 
-  <!-- Totalizador de monto -->
+  <!-- Nota -->
   <div>
-    <p class="text-xs text-gray-500 mb-1 font-semibold uppercase tracking-wide">Monto</p>
-    <div class="bg-gray-900 border border-gray-800 rounded-xl px-4 py-3 flex items-center justify-between">
-      <span class="text-3xl font-black text-white" id="lbl-monto">$0</span>
-      <button onclick="clearMonto()" class="text-xs text-gray-500 border border-gray-700 rounded-lg px-3 py-1.5 font-semibold">Limpiar</button>
-    </div>
-
-    <!-- Botón $80 grande -->
-    <button class="btn-money w-full mt-2 text-xl py-4 bg-blue-700 border-blue-600 text-white" onclick="addMonto(80)">+ $80</button>
-
-    <!-- Botones rápidos -->
-    <div class="grid grid-cols-6 gap-1.5 mt-2">
-      <button class="btn-money" onclick="addMonto(1)">+$1</button>
-      <button class="btn-money" onclick="addMonto(5)">+$5</button>
-      <button class="btn-money" onclick="addMonto(10)">+$10</button>
-      <button class="btn-money" onclick="addMonto(50)">+$50</button>
-      <button class="btn-money" onclick="addMonto(100)">+$100</button>
-      <button class="btn-money" onclick="addMonto(500)">+$500</button>
-    </div>
-
-    <!-- Botón restar -->
-    <div class="grid grid-cols-6 gap-1.5 mt-1.5">
-      <button class="btn-money text-red-400" onclick="subMonto(1)">-$1</button>
-      <button class="btn-money text-red-400" onclick="subMonto(5)">-$5</button>
-      <button class="btn-money text-red-400" onclick="subMonto(10)">-$10</button>
-      <button class="btn-money text-red-400" onclick="subMonto(50)">-$50</button>
-      <button class="btn-money text-red-400" onclick="subMonto(100)">-$100</button>
-      <button class="btn-money text-red-400" onclick="subMonto(500)">-$500</button>
-    </div>
-  </div>
-
-  <!-- Nota opcional -->
-  <div>
-    <p class="text-xs text-gray-500 mb-1 font-semibold uppercase tracking-wide">Nota (opcional)</p>
+    <p class="sec-label">Nota (opcional)</p>
     <input id="inp-nota" type="text" placeholder="Ej: sin frijoles, soda extra…"/>
   </div>
 
-  <!-- BOTÓN REGISTRAR -->
-  <button id="btn-registrar" onclick="registrarMovimiento()"
-    class="btn-main bg-blue-600 hover:bg-blue-700 text-white w-full text-lg py-5 mt-1">
-    ✅ Registrar Movimiento
-  </button>
+  <!-- REGISTRAR -->
+  <button class="btn-primary" onclick="registrar()">✅ Registrar movimiento</button>
 
-  <!-- Movimientos de hoy (mini log) -->
+  <!-- Log hoy -->
   <div>
-    <div class="flex items-center justify-between mb-1">
-      <p class="text-xs text-gray-500 font-semibold uppercase tracking-wide">Hoy</p>
-      <span class="text-xs text-gray-600" id="lbl-hoy-count"></span>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+      <p class="sec-label">Registros de hoy</p>
+      <span style="font-size:.75rem;color:var(--text3);" id="cnt-hoy"></span>
     </div>
-    <div id="log-hoy" class="bg-gray-900 border border-gray-800 rounded-xl divide-y divide-gray-800 max-h-52 overflow-y-auto">
-      <p class="text-gray-600 text-xs p-3 text-center">Sin movimientos hoy</p>
+    <div class="card" id="log-hoy">
+      <p style="padding:16px;text-align:center;color:var(--text3);font-size:.88rem;">Sin movimientos hoy</p>
     </div>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════
-     PESTAÑA 2: RESUMEN
-══════════════════════════════════════════ -->
-<div id="view-res" class="flex-1 flex flex-col gap-3 p-3 overflow-y-auto pb-20 hidden">
-
-  <div class="flex items-center gap-2 flex-wrap">
-    <button onclick="buildResumen()" class="btn-main bg-gray-800 text-white flex-1 text-sm py-3">🔄 Actualizar</button>
-    <button onclick="downloadExcel()" class="btn-main bg-green-700 text-white flex-1 text-sm py-3">📥 Excel</button>
-    <button onclick="showAbonos()" class="btn-main bg-yellow-700 text-white flex-1 text-sm py-3">💵 Abonos</button>
+<!-- ── RESUMEN ── -->
+<div id="view-res" class="view" style="padding:14px 14px 100px;display:none;flex-direction:column;gap:12px;">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+    <button onclick="buildResumen()" style="padding:13px;border-radius:14px;border:1.5px solid var(--border);background:var(--card);color:var(--blue);font-weight:700;font-size:.9rem;cursor:pointer;">🔄 Actualizar</button>
+    <button onclick="downloadExcel()" class="btn-primary green" style="padding:13px;font-size:.9rem;">📥 Descargar Excel</button>
   </div>
 
-  <!-- Filtro cuadrilla resumen -->
-  <div class="grid grid-cols-2 gap-2">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
     <div>
-      <p class="text-xs text-gray-500 mb-1">Cuadrilla</p>
-      <select id="sel-res-cuadrilla" onchange="buildResumen()">
-        <option value="">Todas</option>
-      </select>
+      <p class="sec-label">Cuadrilla</p>
+      <select id="sel-res-cuad" onchange="buildResumen()"><option value="">Todas</option></select>
     </div>
     <div>
-      <p class="text-xs text-gray-500 mb-1">Semana</p>
-      <select id="sel-semana" onchange="buildResumen()">
-        <option value="current">Semana actual</option>
-      </select>
+      <p class="sec-label">Semana</p>
+      <select id="sel-semana" onchange="buildResumen()"><option value="current">Semana actual</option></select>
     </div>
   </div>
 
-  <!-- Totales globales -->
-  <div class="grid grid-cols-3 gap-2" id="totales-globales">
-    <div class="bg-gray-900 rounded-xl p-3 border border-gray-800 text-center">
-      <p class="text-xs text-gray-500">Consumido</p>
-      <p class="text-lg font-black text-white" id="tot-consumido">$0</p>
+  <!-- KPIs -->
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+    <div class="kpi-box">
+      <div class="kpi-val" id="kpi-cons">$0</div>
+      <div class="kpi-lbl">Consumido</div>
     </div>
-    <div class="bg-gray-900 rounded-xl p-3 border border-gray-800 text-center">
-      <p class="text-xs text-gray-500">Abonado</p>
-      <p class="text-lg font-black text-green-400" id="tot-abonado">$0</p>
+    <div class="kpi-box">
+      <div class="kpi-val" style="color:var(--green);" id="kpi-abon">$0</div>
+      <div class="kpi-lbl">Abonado</div>
     </div>
-    <div class="bg-gray-900 rounded-xl p-3 border border-gray-800 text-center">
-      <p class="text-xs text-gray-500">Por cobrar</p>
-      <p class="text-lg font-black text-red-400" id="tot-deuda">$0</p>
+    <div class="kpi-box">
+      <div class="kpi-val" style="color:var(--red);" id="kpi-deuda">$0</div>
+      <div class="kpi-lbl">Por cobrar</div>
     </div>
   </div>
 
-  <!-- Tabla resumen -->
-  <div id="tabla-resumen" class="flex flex-col gap-2">
-    <p class="text-gray-600 text-sm text-center py-6">Presiona Actualizar para ver el resumen</p>
+  <!-- Tabla -->
+  <div id="tabla-res" style="display:flex;flex-direction:column;gap:8px;">
+    <p style="text-align:center;color:var(--text3);font-size:.9rem;padding:24px;">Presiona Actualizar ↑</p>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════
-     PESTAÑA 3: CONFIG
-══════════════════════════════════════════ -->
-<div id="view-cfg" class="flex-1 flex flex-col gap-4 p-3 overflow-y-auto pb-20 hidden">
+<!-- ── CONFIG ── -->
+<div id="view-cfg" class="view" style="padding:14px 14px 100px;display:none;flex-direction:column;gap:12px;">
 
   <!-- Cuadrillas -->
-  <div class="bg-gray-900 rounded-xl border border-gray-800 p-4">
-    <h2 class="font-bold text-white mb-3">Cuadrillas</h2>
-    <div id="list-cuadrillas" class="flex flex-col gap-2 mb-3"></div>
-    <div class="flex gap-2">
-      <input id="inp-nueva-cuadrilla" type="text" placeholder="Nueva cuadrilla…" class="flex-1"/>
-      <button onclick="addCuadrilla()" class="btn-main bg-blue-600 text-white text-sm px-4 py-2 whitespace-nowrap">Agregar</button>
+  <div class="card-section">
+    <p style="font-weight:700;font-size:1rem;margin-bottom:10px;">Cuadrillas</p>
+    <div id="list-cuad" style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px;"></div>
+    <div style="display:flex;gap:8px;">
+      <input id="inp-new-cuad" type="text" placeholder="Nueva cuadrilla…" style="flex:1;"/>
+      <button onclick="addCuadrilla()" style="padding:12px 16px;border-radius:12px;background:var(--blue);color:#fff;border:none;font-weight:700;cursor:pointer;">+</button>
     </div>
   </div>
 
   <!-- Trabajadores -->
-  <div class="bg-gray-900 rounded-xl border border-gray-800 p-4">
-    <h2 class="font-bold text-white mb-1">Trabajadores</h2>
-    <p class="text-xs text-gray-500 mb-3"><span id="cnt-workers">0</span> registrados</p>
-    <div class="flex gap-2 mb-3">
-      <input id="inp-search-cfg" type="text" placeholder="Buscar trabajador…" class="flex-1" oninput="renderWorkersCfg()"/>
+  <div class="card-section">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <p style="font-weight:700;font-size:1rem;">Trabajadores</p>
+      <span style="font-size:.8rem;color:var(--text2);" id="cnt-w">0 registrados</span>
     </div>
-    <div id="list-workers-cfg" class="max-h-64 overflow-y-auto flex flex-col gap-1.5 mb-3"></div>
-    <button onclick="openAddWorker()" class="btn-main bg-blue-600 text-white w-full text-sm py-3">➕ Nuevo Trabajador</button>
+    <input id="inp-cfg-search" type="text" placeholder="Buscar…" oninput="renderWorkersCfg()" style="margin-bottom:10px;"/>
+    <div id="list-workers-cfg" style="max-height:260px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;margin-bottom:10px;"></div>
+    <button class="btn-primary" onclick="openAddWorker()">➕ Nuevo trabajador</button>
   </div>
 
-  <!-- Webhook URL -->
-  <div class="bg-gray-900 rounded-xl border border-gray-800 p-4">
-    <h2 class="font-bold text-white mb-2">Google Sheets Webhook</h2>
-    <p class="text-xs text-gray-500 mb-2">URL del Apps Script desplegado</p>
-    <input id="inp-webhook" type="url" placeholder="https://script.google.com/macros/s/…/exec"/>
-    <button onclick="saveWebhook()" class="btn-main bg-green-700 text-white w-full text-sm py-3 mt-2">Guardar URL</button>
+  <!-- Sync desde Sheets -->
+  <div class="card-section">
+    <p style="font-weight:700;font-size:1rem;margin-bottom:6px;">Sincronizar desde Sheets</p>
+    <p style="font-size:.8rem;color:var(--text2);margin-bottom:10px;">Si borraste filas en el Excel, jala el estado actualizado.</p>
+    <button class="btn-primary" onclick="pullFromSheets()" style="background:var(--purple);">⬇ Importar desde Google Sheets</button>
   </div>
 
-  <!-- Datos -->
-  <div class="bg-gray-900 rounded-xl border border-gray-800 p-4">
-    <h2 class="font-bold text-white mb-3">Datos</h2>
-    <button onclick="exportBackup()" class="btn-main bg-gray-700 text-white w-full text-sm py-3 mb-2">📦 Exportar backup JSON</button>
-    <button onclick="showImport()" class="btn-main bg-gray-700 text-white w-full text-sm py-3 mb-2">📂 Importar backup JSON</button>
-    <button onclick="limpiarSemana()" class="btn-main bg-red-900 text-red-300 w-full text-sm py-3">🗑️ Limpiar semana anterior</button>
+  <!-- Webhook -->
+  <div class="card-section">
+    <p style="font-weight:700;font-size:1rem;margin-bottom:6px;">Google Sheets Webhook</p>
+    <input id="inp-webhook" type="url" placeholder="https://script.google.com/macros/s/…/exec" style="margin-bottom:8px;"/>
+    <button class="btn-primary" onclick="saveWebhook()">Guardar URL</button>
+  </div>
+
+  <!-- Backup -->
+  <div class="card-section">
+    <p style="font-weight:700;font-size:1rem;margin-bottom:10px;">Respaldo</p>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <button onclick="exportBackup()" style="padding:13px;border-radius:12px;border:1.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:600;cursor:pointer;">📦 Exportar backup JSON</button>
+      <button onclick="document.getElementById('file-import').click()" style="padding:13px;border-radius:12px;border:1.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:600;cursor:pointer;">📂 Importar backup JSON</button>
+      <button onclick="limpiarSemana()" style="padding:13px;border-radius:12px;border:1.5px solid var(--red);background:var(--red-l);color:var(--red);font-weight:700;cursor:pointer;">🗑️ Limpiar datos de semana anterior</button>
+    </div>
   </div>
 </div>
 
-<!-- ══ MODAL AGREGAR TRABAJADOR ══ -->
-<div id="modal-overlay" class="hidden" onclick="closeModalIfOverlay(event)">
-  <div id="modal-box" class="slide-up">
-    <div class="flex items-center justify-between mb-4">
-      <h3 class="font-bold text-lg text-white" id="modal-title">Nuevo Trabajador</h3>
-      <button onclick="closeModal()" class="text-gray-500 text-xl">✕</button>
+<!-- ══ TAB BAR ══ -->
+<nav class="tab-bar">
+  <button class="tab-btn active" id="tab-reg" onclick="switchView('reg')">
+    <span class="ti">📝</span>
+    <span class="tl" style="color:var(--blue);">Registro</span>
+  </button>
+  <button class="tab-btn" id="tab-res" onclick="switchView('res')">
+    <span class="ti">📊</span>
+    <span class="tl">Resumen</span>
+  </button>
+  <button class="tab-btn" id="tab-cfg" onclick="switchView('cfg')">
+    <span class="ti">⚙️</span>
+    <span class="tl">Config</span>
+  </button>
+</nav>
+
+<!-- ══ MODAL ══ -->
+<div id="modal-overlay" style="display:none;" onclick="handleOverlayClick(event)">
+  <div id="modal-box">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title" id="modal-title">Modal</span>
+      <button class="modal-close" id="modal-close-btn" onclick="closeModal()">✕</button>
     </div>
-    <div id="modal-content"></div>
+    <div class="modal-body" id="modal-body"></div>
   </div>
 </div>
 
-<!-- ══ IMPORT FILE ══ -->
-<input type="file" id="file-import" accept=".json" class="hidden" onchange="importBackup(event)"/>
+<!-- ══ TOAST ══ -->
+<div id="toast"></div>
+<input type="file" id="file-import" accept=".json" style="display:none;" onchange="importBackup(event)"/>
 
 <script>
-// ════════════════════════════════════════════════════════
-//  ZONA HORARIA
-// ════════════════════════════════════════════════════════
+// ════════════════════════════════
+// ZONA HORARIA
+// ════════════════════════════════
 const TZ = 'America/Tijuana';
-
 function tzNow() {
   const now = new Date();
-  // Obtener partes en TZ de Tijuana
-  const parts = new Intl.DateTimeFormat('en-CA', {
-    timeZone: TZ,
-    year:'numeric', month:'2-digit', day:'2-digit',
-    hour:'2-digit', minute:'2-digit', second:'2-digit',
-    hour12: false
-  }).formatToParts(now);
-  const p = {};
-  parts.forEach(x => { p[x.type] = x.value; });
-  return {
-    date: `${p.year}-${p.month}-${p.day}`,
-    time: `${p.hour}:${p.minute}`,
-    dayName: new Intl.DateTimeFormat('es', { timeZone: TZ, weekday: 'long' })
-              .format(now).replace(/^\w/, c => c.toUpperCase()),
-    ts: now.getTime()
-  };
+  const fmt = (opts) => new Intl.DateTimeFormat('en-CA', { timeZone: TZ, ...opts }).format(now);
+  const date = fmt({ year:'numeric', month:'2-digit', day:'2-digit' });
+  const time = fmt({ hour:'2-digit', minute:'2-digit', hour12: false });
+  const dayName = new Intl.DateTimeFormat('es', { timeZone: TZ, weekday: 'long' })
+    .format(now).replace(/^\w/, c => c.toUpperCase());
+  return { date, time, dayName, ts: now.getTime() };
 }
-
 function getWeekBounds() {
-  const now = new Date();
-  const tz = tzNow();
-  // Lunes de la semana actual
-  const dayOfWeek = new Date(tz.date + 'T12:00:00').getDay(); // 0=dom,1=lun...
-  const diffToMon = (dayOfWeek === 0) ? -6 : 1 - dayOfWeek;
-  const mon = new Date(tz.date + 'T12:00:00');
-  mon.setDate(mon.getDate() + diffToMon);
-  const sat = new Date(mon); sat.setDate(mon.getDate() + 5);
-  const fmt = d => d.toLocaleDateString('es', { timeZone: TZ, day:'2-digit', month:'short' });
-  const iso = d => {
-    const p = new Intl.DateTimeFormat('en-CA', { timeZone: TZ, year:'numeric', month:'2-digit', day:'2-digit' }).format(d);
-    return p;
-  };
-  return { start: iso(mon), end: iso(sat), label: `${fmt(mon)} – ${fmt(sat)}` };
+  const now  = new Date();
+  const date = new Intl.DateTimeFormat('en-CA', { timeZone: TZ }).format(now);
+  const d    = new Date(date + 'T12:00:00');
+  const dow  = d.getDay();
+  const diff = dow === 0 ? -6 : 1 - dow;
+  const mon  = new Date(d); mon.setDate(d.getDate() + diff);
+  const sat  = new Date(mon); sat.setDate(mon.getDate() + 5);
+  const iso  = x => x.toISOString().split('T')[0];
+  const lbl  = x => x.toLocaleDateString('es', { timeZone: TZ, day:'2-digit', month:'short' });
+  return { start: iso(mon), end: iso(sat), label: `${lbl(mon)} – ${lbl(sat)}` };
 }
 
-// ════════════════════════════════════════════════════════
-//  INDEXEDDB
-// ════════════════════════════════════════════════════════
+// ════════════════════════════════
+// INDEXEDDB
+// ════════════════════════════════
 let db;
-const DB_NAME = 'ObraComidas', DB_VER = 2;
-
 function openDB() {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, DB_VER);
+  return new Promise((res, rej) => {
+    const req = indexedDB.open('ObraComidas', 3);
     req.onupgradeneeded = e => {
       const d = e.target.result;
       if (!d.objectStoreNames.contains('movimientos')) {
-        const s = d.createObjectStore('movimientos', { keyPath: 'id', autoIncrement: true });
-        s.createIndex('fecha', 'fecha', { unique: false });
-        s.createIndex('trabajadorId', 'trabajadorId', { unique: false });
-        s.createIndex('synced', 'synced', { unique: false });
+        const s = d.createObjectStore('movimientos', { keyPath:'id', autoIncrement:true });
+        s.createIndex('fecha', 'fecha'); s.createIndex('trabajadorId', 'trabajadorId');
+        s.createIndex('synced', 'synced'); s.createIndex('remoteId', 'remoteId', {unique:false});
       }
       if (!d.objectStoreNames.contains('trabajadores')) {
-        const s2 = d.createObjectStore('trabajadores', { keyPath: 'id', autoIncrement: true });
-        s2.createIndex('nombre', 'nombre', { unique: false });
-        s2.createIndex('cuadrilla', 'cuadrilla', { unique: false });
+        d.createObjectStore('trabajadores', { keyPath:'id', autoIncrement:true });
       }
       if (!d.objectStoreNames.contains('config')) {
-        d.createObjectStore('config', { keyPath: 'key' });
+        d.createObjectStore('config', { keyPath:'key' });
       }
     };
-    req.onsuccess = e => { db = e.target.result; resolve(db); };
-    req.onerror   = e => reject(e);
+    req.onsuccess = e => { db = e.target.result; res(db); };
+    req.onerror   = e => rej(e);
+  });
+}
+const tx  = (store, mode='readonly') => db.transaction(store, mode).objectStore(store);
+const dbGet    = (s,k) => new Promise((r,j) => { const q=tx(s).get(k); q.onsuccess=e=>r(e.target.result); q.onerror=j; });
+const dbGetAll = (s)   => new Promise((r,j) => { const q=tx(s).getAll(); q.onsuccess=e=>r(e.target.result); q.onerror=j; });
+const dbPut    = (s,v) => new Promise((r,j) => { const q=tx(s,'readwrite').put(v); q.onsuccess=e=>r(e.target.result); q.onerror=j; });
+const dbAdd    = (s,v) => new Promise((r,j) => { const q=tx(s,'readwrite').add(v); q.onsuccess=e=>r(e.target.result); q.onerror=j; });
+const dbDel    = (s,k) => new Promise((r,j) => { const q=tx(s,'readwrite').delete(k); q.onsuccess=r; q.onerror=j; });
+async function dbByIndex(store, idxName, val) {
+  return new Promise((r,j) => {
+    const q = tx(store).index(idxName).getAll(val);
+    q.onsuccess=e=>r(e.target.result); q.onerror=j;
   });
 }
 
-function dbGet(store, key) {
-  return new Promise((res, rej) => {
-    const tx = db.transaction(store, 'readonly');
-    const req = tx.objectStore(store).get(key);
-    req.onsuccess = e => res(e.target.result);
-    req.onerror   = e => rej(e);
-  });
-}
-function dbGetAll(store) {
-  return new Promise((res, rej) => {
-    const tx = db.transaction(store, 'readonly');
-    const req = tx.objectStore(store).getAll();
-    req.onsuccess = e => res(e.target.result);
-    req.onerror   = e => rej(e);
-  });
-}
-function dbPut(store, val) {
-  return new Promise((res, rej) => {
-    const tx = db.transaction(store, 'readwrite');
-    const req = tx.objectStore(store).put(val);
-    req.onsuccess = e => res(e.target.result);
-    req.onerror   = e => rej(e);
-  });
-}
-function dbAdd(store, val) {
-  return new Promise((res, rej) => {
-    const tx = db.transaction(store, 'readwrite');
-    const req = tx.objectStore(store).add(val);
-    req.onsuccess = e => res(e.target.result);
-    req.onerror   = e => rej(e);
-  });
-}
-function dbDelete(store, key) {
-  return new Promise((res, rej) => {
-    const tx = db.transaction(store, 'readwrite');
-    const req = tx.objectStore(store).delete(key);
-    req.onsuccess = e => res();
-    req.onerror   = e => rej(e);
-  });
-}
-async function dbGetByIndex(store, indexName, value) {
-  return new Promise((res, rej) => {
-    const tx = db.transaction(store, 'readonly');
-    const idx = tx.objectStore(store).index(indexName);
-    const req = idx.getAll(value);
-    req.onsuccess = e => res(e.target.result);
-    req.onerror   = e => rej(e);
-  });
-}
+// ════════════════════════════════
+// ESTADO
+// ════════════════════════════════
+let monto        = 0;
+let tiposActivos = new Set(); // 'D','C','S','A'
+let workerSel    = null;
+let allWorkers   = [];
+let allCuad      = [];
+let showingList  = false;
 
-// ════════════════════════════════════════════════════════
-//  ESTADO
-// ════════════════════════════════════════════════════════
-let monto = 0;
-let tipoSel = 'Desayuno';
-let workerSel = null;
-let allWorkers = [];
-let allCuadrillas = [];
-
-// ════════════════════════════════════════════════════════
-//  INIT
-// ════════════════════════════════════════════════════════
+// ════════════════════════════════
+// INIT
+// ════════════════════════════════
 async function init() {
   await openDB();
   await loadConfig();
@@ -464,686 +681,729 @@ async function init() {
   updateDateLabels();
   renderLogHoy();
   updatePendingCount();
-  await loadHistoricalWeeks();
-
-  // Service Worker
+  await loadHistWeeks();
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js').catch(e => console.warn('SW:', e));
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+    navigator.serviceWorker.addEventListener('message', e => {
+      if (e.data?.type === 'SYNC_NOW') syncNow();
+    });
   }
-
-  window.addEventListener('online',  updateStatusBar);
+  window.addEventListener('online',  () => { updateStatusBar(); updatePendingCount(); });
   window.addEventListener('offline', updateStatusBar);
-  window.addEventListener('online',  updatePendingCount);
 }
 
 function updateDateLabels() {
-  const t = tzNow();
+  const t  = tzNow();
   const wb = getWeekBounds();
   document.getElementById('lbl-date').textContent = t.date;
   document.getElementById('lbl-week').textContent = `Semana: ${wb.label}`;
 }
 
 async function loadConfig() {
-  const cfg = await dbGet('config', 'cuadrillas');
-  if (cfg) {
-    allCuadrillas = cfg.value;
-  } else {
-    allCuadrillas = [];
-    await dbPut('config', { key: 'cuadrillas', value: [] });
-  }
+  const c = await dbGet('config', 'cuadrillas');
+  allCuad = c ? c.value : [];
   const wh = await dbGet('config', 'webhook');
   if (wh) document.getElementById('inp-webhook').value = wh.value;
-  renderCuadrillasSelect();
-  renderCuadrillasCfg();
+  renderCuadSelects();
+  renderCuadList();
 }
 
 async function loadWorkers() {
   allWorkers = await dbGetAll('trabajadores');
   allWorkers.sort((a,b) => a.nombre.localeCompare(b.nombre));
-  filterWorkers();
-  renderWorkersCfg();
-  document.getElementById('cnt-workers').textContent = allWorkers.length;
+  document.getElementById('cnt-w').textContent = `${allWorkers.length} registrados`;
 }
 
-// ════════════════════════════════════════════════════════
-//  TABS
-// ════════════════════════════════════════════════════════
-function switchTab(tab) {
-  ['reg','res','cfg'].forEach(t => {
-    document.getElementById(`view-${t}`).classList.toggle('hidden', t !== tab);
-    document.getElementById(`tab-${t}`).className =
-      `flex-1 py-3 text-sm font-bold rounded-none ${t === tab ? 'tab-active':'tab-inactive'}`;
+// ════════════════════════════════
+// TABS
+// ════════════════════════════════
+function switchView(v) {
+  ['reg','res','cfg'].forEach(x => {
+    document.getElementById(`view-${x}`).style.display = x===v ? 'flex' : 'none';
+    document.getElementById(`view-${x}`).style.flexDirection = 'column';
+    const tb = document.getElementById(`tab-${x}`);
+    tb.classList.toggle('active', x===v);
+    tb.querySelector('.tl').style.color = x===v ? 'var(--blue)' : 'var(--text3)';
   });
-  if (tab === 'res') buildResumen();
-  if (tab === 'cfg') { renderCuadrillasCfg(); renderWorkersCfg(); }
+  if (v==='res') buildResumen();
+  if (v==='cfg') { renderCuadList(); renderWorkersCfg(); }
 }
 
-// ════════════════════════════════════════════════════════
-//  MONTO
-// ════════════════════════════════════════════════════════
-function addMonto(v) { monto = Math.max(0, monto + v); renderMonto(); }
-function subMonto(v) { monto = Math.max(0, monto - v); renderMonto(); }
-function clearMonto() { monto = 0; renderMonto(); }
+// ════════════════════════════════
+// TIPO (multi-select)
+// ════════════════════════════════
+function toggleTipo(t) {
+  // Abono es exclusivo
+  if (t === 'A') {
+    tiposActivos.clear();
+    tiposActivos.add('A');
+  } else {
+    tiposActivos.delete('A');
+    if (tiposActivos.has(t)) tiposActivos.delete(t);
+    else                     tiposActivos.add(t);
+  }
+  renderTipos();
+  updateMontoHint();
+}
+
+function renderTipos() {
+  ['D','C','S','A'].forEach(t => {
+    const el = document.getElementById(`chip-${t}`);
+    el.className = `tipo-chip${tiposActivos.has(t) ? ` active-${t}` : ''}`;
+  });
+}
+
+function updateMontoHint() {
+  const n = tiposActivos.size;
+  const el = document.getElementById('tipo-hint');
+  if (n <= 1 || tiposActivos.has('A')) { el.textContent = ''; return; }
+  const labels = { D:'Desayuno', C:'Comida', S:'Soda' };
+  const lista = [...tiposActivos].map(t => labels[t]).join(' + ');
+  const porTipo = monto > 0 ? ` → $${Math.round(monto/n)} c/u` : '';
+  el.textContent = `${lista}${porTipo} · Se registran ${n} movimientos`;
+}
+
+// ════════════════════════════════
+// MONTO
+// ════════════════════════════════
+function addMonto(v)  { monto = Math.max(0, monto+v);  renderMonto(); }
+function subMonto(v)  { monto = Math.max(0, monto-v);  renderMonto(); }
+function clearMonto() { monto = 0;                      renderMonto(); }
+function setMonto(v)  { monto = v;                      renderMonto(); }
 function renderMonto() {
   document.getElementById('lbl-monto').textContent = `$${monto}`;
+  updateMontoHint();
 }
 
-// ════════════════════════════════════════════════════════
-//  TIPO
-// ════════════════════════════════════════════════════════
-function setTipo(t) {
-  tipoSel = t;
-  ['Desayuno','Comida','Soda','Abono'].forEach(x => {
-    document.getElementById(`tipo-${x}`).classList.toggle('selected', x === t);
-  });
-  // Si es Desayuno o Comida, precargar $80
-  if (t === 'Desayuno' || t === 'Comida') {
-    if (monto === 0) { monto = 80; renderMonto(); }
-  }
-}
-
-// ════════════════════════════════════════════════════════
-//  WORKERS
-// ════════════════════════════════════════════════════════
-function renderCuadrillasSelect() {
-  ['sel-cuadrilla','sel-res-cuadrilla'].forEach(id => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.innerHTML = '<option value="">Todas</option>';
-    allCuadrillas.forEach(c => {
-      const o = document.createElement('option');
-      o.value = o.textContent = c;
-      el.appendChild(o);
-    });
-  });
+// ════════════════════════════════
+// TRABAJADOR
+// ════════════════════════════════
+function showWorkerList() {
+  showingList = true;
+  document.getElementById('worker-list').style.display = 'block';
+  document.getElementById('btn-show-list').style.display = 'none';
+  filterWorkers();
 }
 
 function filterWorkers() {
+  if (!showingList) return;
   const cuad = document.getElementById('sel-cuadrilla').value;
-  const q    = document.getElementById('inp-search').value.toLowerCase().trim();
-  let list = allWorkers;
+  const q    = document.getElementById('inp-search').value.toLowerCase();
+  let list   = allWorkers;
   if (cuad) list = list.filter(w => w.cuadrilla === cuad);
   if (q)    list = list.filter(w => w.nombre.toLowerCase().includes(q));
-
-  const el = document.getElementById('worker-list');
+  const el   = document.getElementById('worker-list');
   if (!list.length) {
-    el.innerHTML = '<p class="text-gray-600 text-xs p-3 text-center">Sin resultados</p>';
+    el.innerHTML = '<p style="padding:14px;text-align:center;color:var(--text3);font-size:.88rem;">Sin resultados</p>';
     return;
   }
   el.innerHTML = list.map(w => `
-    <div class="worker-row flex items-center justify-between px-3 py-2.5 cursor-pointer hover:bg-gray-800 transition-colors"
-         onclick="selectWorker(${w.id})">
+    <div class="worker-row" onclick="selectWorker(${w.id})">
       <div>
-        <span class="text-sm font-semibold text-white">${w.nombre}</span>
-        <span class="text-xs text-gray-500 ml-1">${w.cuadrilla}</span>
+        <div style="font-weight:600;font-size:.95rem;">${w.nombre}</div>
+        <div style="font-size:.75rem;color:var(--text3);">${w.cuadrilla||'Sin cuadrilla'}</div>
       </div>
-      <span class="text-blue-400 text-lg">→</span>
+      <span style="color:var(--blue);font-size:1.1rem;">›</span>
     </div>
   `).join('');
 }
 
 async function selectWorker(id) {
-  workerSel = allWorkers.find(w => w.id === id);
+  workerSel = allWorkers.find(w => w.id===id);
   if (!workerSel) return;
+  document.getElementById('worker-list').style.display   = 'none';
+  document.getElementById('btn-show-list').style.display = 'none';
+  document.getElementById('worker-selected').style.display = 'block';
+  document.getElementById('lbl-wname').textContent  = workerSel.nombre;
+  document.getElementById('lbl-wsquad').textContent = workerSel.cuadrilla||'Sin cuadrilla';
+  showingList = false;
 
-  document.getElementById('lbl-worker-name').textContent = workerSel.nombre;
-  document.getElementById('lbl-worker-squad').textContent = `(${workerSel.cuadrilla})`;
-  document.getElementById('worker-selected').classList.remove('hidden');
-  document.getElementById('worker-list').classList.add('hidden');
-
-  // Calcular saldo pendiente
-  const movs = await dbGetByIndex('movimientos', 'trabajadorId', workerSel.id);
+  // Calcular deuda histórica
+  const movs = await dbGetAll('movimientos');
   const wb   = getWeekBounds();
-  const prevMovs = movs.filter(m => m.fecha < wb.start);
-  const prevConsumido = prevMovs.filter(m => m.tipo !== 'Abono').reduce((s,m) => s+m.monto, 0);
-  const prevAbonado  = prevMovs.filter(m => m.tipo === 'Abono').reduce((s,m) => s+m.monto, 0);
-  const saldoPrev    = prevConsumido - prevAbonado;
+  const prev = movs.filter(m => m.trabajadorId===id);
+  const cons = prev.filter(m=>m.tipo!=='Abono').reduce((s,m)=>s+m.monto,0);
+  const abon = prev.filter(m=>m.tipo==='Abono').reduce((s,m)=>s+m.monto,0);
+  const deuda = cons - abon;
+  const el = document.getElementById('lbl-deuda-worker');
+  if (deuda>0) { el.textContent=`Debe $${deuda}`; el.style.display='inline'; }
+  else         { el.style.display='none'; }
 
-  const el = document.getElementById('lbl-saldo-prev');
-  if (saldoPrev > 0) {
-    el.textContent = `⚠️ Saldo anterior: $${saldoPrev}`;
-    el.classList.remove('hidden');
-  } else {
-    el.textContent = '';
-  }
+  // Auto-poner $80 si hay tipo seleccionado
+  if (monto===0 && (tiposActivos.has('D')||tiposActivos.has('C'))) setMonto(80);
 }
 
 function clearWorker() {
   workerSel = null;
-  document.getElementById('worker-selected').classList.add('hidden');
-  document.getElementById('worker-list').classList.remove('hidden');
+  document.getElementById('worker-selected').style.display = 'none';
+  document.getElementById('btn-show-list').style.display   = 'block';
   document.getElementById('inp-search').value = '';
-  document.getElementById('lbl-saldo-prev').textContent = '';
-  filterWorkers();
+  showingList = false;
 }
 
-// ════════════════════════════════════════════════════════
-//  REGISTRAR MOVIMIENTO
-// ════════════════════════════════════════════════════════
-async function registrarMovimiento() {
-  if (!workerSel)  { showToast('⚠️ Selecciona un trabajador'); return; }
-  if (monto <= 0)  { showToast('⚠️ Ingresa un monto'); return; }
+// ════════════════════════════════
+// REGISTRAR
+// ════════════════════════════════
+async function registrar() {
+  if (!workerSel)         { showToast('⚠️ Selecciona un trabajador'); return; }
+  if (tiposActivos.size===0){ showToast('⚠️ Selecciona el tipo'); return; }
+  if (monto<=0)            { showToast('⚠️ Ingresa un monto'); return; }
 
   const t    = tzNow();
   const nota = document.getElementById('inp-nota').value.trim();
+  const tipos = [...tiposActivos];
+  const montoPorTipo = Math.round(monto / tipos.length);
 
-  const mov = {
-    trabajadorId: workerSel.id,
-    trabajadorNombre: workerSel.nombre,
-    cuadrilla: workerSel.cuadrilla,
-    tipo: tipoSel,
-    monto: monto,
-    fecha: t.date,
-    hora: t.time,
-    diaSemana: t.dayName,
-    nota: nota,
-    ts: t.ts,
-    synced: 0
-  };
+  const tipoMap = { D:'Desayuno', C:'Comida', S:'Soda', A:'Abono' };
 
-  await dbAdd('movimientos', mov);
-  showToast(`✅ ${workerSel.nombre} – ${tipoSel} $${monto}`);
+  for (const tipo of tipos) {
+    const mov = {
+      trabajadorId:     workerSel.id,
+      trabajadorNombre: workerSel.nombre,
+      cuadrilla:        workerSel.cuadrilla,
+      tipo:             tipoMap[tipo],
+      monto:            montoPorTipo,
+      fecha:            t.date,
+      hora:             t.time,
+      diaSemana:        t.dayName,
+      nota,
+      ts:               t.ts,
+      synced:           0,
+      remoteId:         null
+    };
+    await dbAdd('movimientos', mov);
+  }
 
-  // Reset
+  const msg = tipos.length > 1
+    ? `✅ ${workerSel.nombre} · ${tipos.map(t=>tipoMap[t]).join('+')} · $${monto}`
+    : `✅ ${workerSel.nombre} · ${tipoMap[tipos[0]]} · $${monto}`;
+  showToast(msg);
+
+  // Reset parcial (mantiene trabajador para rapidez)
   clearMonto();
   document.getElementById('inp-nota').value = '';
   renderLogHoy();
   updatePendingCount();
-
-  // Auto-sync si hay internet
   if (navigator.onLine) syncNow();
 }
 
-// ════════════════════════════════════════════════════════
-//  LOG HOY
-// ════════════════════════════════════════════════════════
+// ════════════════════════════════
+// LOG HOY
+// ════════════════════════════════
 async function renderLogHoy() {
   const hoy  = tzNow().date;
-  const movs = await dbGetByIndex('movimientos', 'fecha', hoy);
-  movs.sort((a,b) => b.ts - a.ts);
-
-  document.getElementById('lbl-hoy-count').textContent =
-    movs.length ? `${movs.length} mov.` : '';
-
+  const movs = (await dbByIndex('movimientos','fecha',hoy)).sort((a,b)=>b.ts-a.ts);
+  document.getElementById('cnt-hoy').textContent = movs.length ? `${movs.length} mov.` : '';
+  const el = document.getElementById('log-hoy');
   if (!movs.length) {
-    document.getElementById('log-hoy').innerHTML =
-      '<p class="text-gray-600 text-xs p-3 text-center">Sin movimientos hoy</p>';
+    el.innerHTML='<p style="padding:16px;text-align:center;color:var(--text3);font-size:.88rem;">Sin movimientos hoy</p>';
     return;
   }
-
-  const tipoColors = {
-    Desayuno: 'badge-blue', Comida: 'badge-blue',
-    Soda: 'badge-blue', Abono: 'badge-green'
-  };
-  document.getElementById('log-hoy').innerHTML = movs.map(m => `
-    <div class="flex items-center justify-between px-3 py-2.5 hover:bg-gray-800">
-      <div class="flex items-center gap-2 min-w-0">
-        <span class="badge ${tipoColors[m.tipo] || 'badge-blue'} shrink-0">${m.tipo}</span>
-        <span class="text-sm text-white truncate">${m.trabajadorNombre}</span>
-        ${m.nota ? `<span class="text-xs text-gray-500 truncate">${m.nota}</span>` : ''}
+  const bClass = { Desayuno:'badge-D', Comida:'badge-C', Soda:'badge-S', Abono:'badge-A' };
+  el.innerHTML = movs.map(m => `
+    <div class="log-row">
+      <div style="display:flex;align-items:center;gap:8px;min-width:0;flex:1;">
+        <span class="badge ${bClass[m.tipo]||'badge-C'}">${m.tipo}</span>
+        <div style="min-width:0;">
+          <div style="font-size:.9rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${m.trabajadorNombre}</div>
+          ${m.nota?`<div style="font-size:.72rem;color:var(--text3);">${m.nota}</div>`:''}
+        </div>
       </div>
-      <div class="flex items-center gap-2 shrink-0">
-        <span class="font-bold text-sm ${m.tipo==='Abono'?'text-green-400':'text-white'}">
-          ${m.tipo==='Abono'?'+':'-'}$${m.monto}
-        </span>
-        <span class="text-xs text-gray-600">${m.hora}</span>
-        <button onclick="deleteMovimiento(${m.id})" class="text-red-800 hover:text-red-500 text-sm px-1">✕</button>
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+        <div style="text-align:right;">
+          <div style="font-weight:700;${m.tipo==='Abono'?'color:var(--green)':''};">${m.tipo==='Abono'?'+':'-'}$${m.monto}</div>
+          <div style="font-size:.7rem;color:var(--text3);">${m.hora}</div>
+        </div>
+        <button onclick="deleteMov(${m.id})" style="background:var(--red-l);color:var(--red);border:none;border-radius:8px;width:28px;height:28px;font-size:.85rem;cursor:pointer;">✕</button>
       </div>
     </div>
   `).join('');
 }
 
-async function deleteMovimiento(id) {
+async function deleteMov(id) {
   if (!confirm('¿Eliminar este movimiento?')) return;
-  await dbDelete('movimientos', id);
+  const mov = await dbGet('movimientos', id);
+  // Si tiene remoteId, notificar a Sheets que lo borre
+  if (mov?.remoteId && navigator.onLine) {
+    const wh = await dbGet('config','webhook');
+    if (wh?.value) {
+      fetch(wh.value, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ action:'delete', remoteId: mov.remoteId })
+      }).catch(()=>{});
+    }
+  }
+  await dbDel('movimientos', id);
   renderLogHoy();
   showToast('Movimiento eliminado');
 }
 
-// ════════════════════════════════════════════════════════
-//  RESUMEN SEMANAL
-// ════════════════════════════════════════════════════════
+// ════════════════════════════════
+// RESUMEN
+// ════════════════════════════════
 async function buildResumen() {
-  const cuadFilt = document.getElementById('sel-res-cuadrilla').value;
-  const semSel   = document.getElementById('sel-semana').value;
-
+  const cuadF = document.getElementById('sel-res-cuad').value;
+  const semV  = document.getElementById('sel-semana').value;
   let start, end;
-  if (semSel === 'current') {
-    const wb = getWeekBounds();
-    start = wb.start; end = wb.end;
-  } else {
-    [start, end] = semSel.split('|');
-  }
+  if (semV==='current') { const wb=getWeekBounds(); start=wb.start; end=wb.end; }
+  else { [start,end] = semV.split('|'); }
 
   let movs = await dbGetAll('movimientos');
-  movs = movs.filter(m => m.fecha >= start && m.fecha <= end);
-  if (cuadFilt) movs = movs.filter(m => m.cuadrilla === cuadFilt);
+  movs = movs.filter(m => m.fecha>=start && m.fecha<=end);
+  if (cuadF) movs = movs.filter(m => m.cuadrilla===cuadF);
 
-  // Agrupar por trabajador
+  const todosMovs = await dbGetAll('movimientos');
   const mapaW = {};
   movs.forEach(m => {
-    if (!mapaW[m.trabajadorId]) {
-      mapaW[m.trabajadorId] = {
-        nombre: m.trabajadorNombre, cuadrilla: m.cuadrilla,
-        desayunos: 0, comidas: 0, sodas: 0, abonos: 0, total: 0
-      };
-    }
+    if (!mapaW[m.trabajadorId]) mapaW[m.trabajadorId] = {
+      nombre:m.trabajadorNombre, cuadrilla:m.cuadrilla||'',
+      des:0, com:0, sod:0, abon:0, total:0
+    };
     const w = mapaW[m.trabajadorId];
-    if (m.tipo === 'Desayuno') { w.desayunos += m.monto; w.total += m.monto; }
-    else if (m.tipo === 'Comida') { w.comidas += m.monto; w.total += m.monto; }
-    else if (m.tipo === 'Soda')   { w.sodas += m.monto;   w.total += m.monto; }
-    else if (m.tipo === 'Abono')  { w.abonos += m.monto; }
+    if (m.tipo==='Desayuno') { w.des+=m.monto; w.total+=m.monto; }
+    else if (m.tipo==='Comida') { w.com+=m.monto; w.total+=m.monto; }
+    else if (m.tipo==='Soda')   { w.sod+=m.monto; w.total+=m.monto; }
+    else if (m.tipo==='Abono')  { w.abon+=m.monto; }
   });
 
-  // Saldo anterior (semanas previas)
-  const todosMovs = await dbGetAll('movimientos');
+  // Saldo anterior
   for (const [wid, data] of Object.entries(mapaW)) {
-    const prevMovs = todosMovs.filter(m => m.trabajadorId == wid && m.fecha < start);
-    const pC = prevMovs.filter(m => m.tipo !== 'Abono').reduce((s,m) => s+m.monto, 0);
-    const pA = prevMovs.filter(m => m.tipo === 'Abono').reduce((s,m) => s+m.monto, 0);
-    data.saldoPrev = Math.max(0, pC - pA);
-    data.saldoActual = (data.total + data.saldoPrev) - data.abonos;
+    const prev = todosMovs.filter(m=>m.trabajadorId==wid && m.fecha<start);
+    const pC = prev.filter(m=>m.tipo!=='Abono').reduce((s,m)=>s+m.monto,0);
+    const pA = prev.filter(m=>m.tipo==='Abono').reduce((s,m)=>s+m.monto,0);
+    data.saldoPrev  = Math.max(0,pC-pA);
+    data.saldoActual= (data.total+data.saldoPrev) - data.abon;
   }
 
-  const rows = Object.values(mapaW);
-  rows.sort((a,b) => b.saldoActual - a.saldoActual);
+  const rows = Object.values(mapaW).sort((a,b)=>b.saldoActual-a.saldoActual);
+  const totC = rows.reduce((s,r)=>s+r.total,0);
+  const totA = rows.reduce((s,r)=>s+r.abon,0);
+  const totD = rows.reduce((s,r)=>s+Math.max(0,r.saldoActual),0);
+  document.getElementById('kpi-cons').textContent  = `$${totC}`;
+  document.getElementById('kpi-abon').textContent  = `$${totA}`;
+  document.getElementById('kpi-deuda').textContent = `$${totD}`;
 
-  const totCons  = rows.reduce((s,r) => s + r.total, 0);
-  const totAbon  = rows.reduce((s,r) => s + r.abonos, 0);
-  const totDeuda = rows.reduce((s,r) => s + Math.max(0, r.saldoActual), 0);
-
-  document.getElementById('tot-consumido').textContent = `$${totCons}`;
-  document.getElementById('tot-abonado').textContent   = `$${totAbon}`;
-  document.getElementById('tot-deuda').textContent     = `$${totDeuda}`;
+  window._resumen = rows;
+  window._resumenPeriodo = `${start}|${end}`;
 
   if (!rows.length) {
-    document.getElementById('tabla-resumen').innerHTML =
-      '<p class="text-gray-600 text-sm text-center py-6">Sin movimientos en esta semana</p>';
+    document.getElementById('tabla-res').innerHTML =
+      '<p style="text-align:center;color:var(--text3);padding:24px;">Sin datos en esta semana</p>';
     return;
   }
 
-  document.getElementById('tabla-resumen').innerHTML = rows.map(r => `
-    <div class="bg-gray-900 rounded-xl border border-gray-800 p-3 slide-up">
-      <div class="flex justify-between items-start mb-2">
+  document.getElementById('tabla-res').innerHTML = rows.map(r => `
+    <div class="res-card">
+      <div class="res-header">
         <div>
-          <span class="font-bold text-white">${r.nombre}</span>
-          <span class="text-xs text-gray-500 ml-1">${r.cuadrilla}</span>
+          <div style="font-weight:700;font-size:1rem;">${r.nombre}</div>
+          <div style="font-size:.75rem;color:var(--text2);">${r.cuadrilla}</div>
+          ${r.saldoPrev>0?`<div style="font-size:.75rem;color:var(--orange);margin-top:2px;">⚠ Saldo ant: $${r.saldoPrev}</div>`:''}
         </div>
-        <span class="font-black text-lg ${r.saldoActual > 0 ? 'text-red-400' : 'text-green-400'}">
-          ${r.saldoActual > 0 ? `Debe $${r.saldoActual}` : '✓ Liquidado'}
-        </span>
-      </div>
-      <div class="grid grid-cols-4 gap-1 text-center text-xs">
-        <div class="bg-gray-800 rounded-lg p-1.5">
-          <p class="text-gray-500">Desay.</p>
-          <p class="font-bold text-white">$${r.desayunos}</p>
-        </div>
-        <div class="bg-gray-800 rounded-lg p-1.5">
-          <p class="text-gray-500">Comida</p>
-          <p class="font-bold text-white">$${r.comidas}</p>
-        </div>
-        <div class="bg-gray-800 rounded-lg p-1.5">
-          <p class="text-gray-500">Soda</p>
-          <p class="font-bold text-white">$${r.sodas}</p>
-        </div>
-        <div class="bg-gray-800 rounded-lg p-1.5">
-          <p class="text-gray-500">Abonó</p>
-          <p class="font-bold text-green-400">$${r.abonos}</p>
+        <div style="text-align:right;">
+          <div style="font-size:1.3rem;font-weight:900;color:${r.saldoActual>0?'var(--red)':'var(--green)'};">
+            ${r.saldoActual>0?`Debe $${r.saldoActual}`:'✓ Liquidado'}
+          </div>
+          <div style="font-size:.72rem;color:var(--text3);">Semana: $${r.total} | Abonó: $${r.abon}</div>
         </div>
       </div>
-      ${r.saldoPrev > 0 ? `<p class="text-xs text-yellow-400 mt-1.5">⚠️ Saldo anterior: $${r.saldoPrev}</p>` : ''}
-      <div class="flex justify-between mt-2 pt-2 border-t border-gray-800 text-xs">
-        <span class="text-gray-500">Semana: $${r.total}</span>
-        <span class="text-gray-500">Total con anterior: $${r.total + r.saldoPrev}</span>
+      <div class="res-grid">
+        <div class="res-cell">
+          <div class="label" style="color:#CC7700;">🍳 Desay.</div>
+          <div class="val">${r.des>0?'$'+r.des:'-'}</div>
+        </div>
+        <div class="res-cell">
+          <div class="label" style="color:#005CC5;">🍽️ Comida</div>
+          <div class="val">${r.com>0?'$'+r.com:'-'}</div>
+        </div>
+        <div class="res-cell">
+          <div class="label" style="color:#8A3DB2;">🥤 Soda</div>
+          <div class="val">${r.sod>0?'$'+r.sod:'-'}</div>
+        </div>
+        <div class="res-cell">
+          <div class="label" style="color:var(--green);">💵 Abono</div>
+          <div class="val" style="color:var(--green);">${r.abon>0?'+$'+r.abon:'-'}</div>
+        </div>
       </div>
     </div>
   `).join('');
-
-  // Guardar referencia para Excel
-  window._lastResumen = rows;
-  window._lastResumenPeriodo = `${start} al ${end}`;
 }
 
-// ════════════════════════════════════════════════════════
-//  EXCEL / SHEETJS
-// ════════════════════════════════════════════════════════
-function downloadExcel() {
-  if (!window._lastResumen || !window._lastResumen.length) {
-    buildResumen().then(downloadExcel);
-    return;
-  }
-  const rows = window._lastResumen;
-  const wb   = XLSX.utils.book_new();
+// ════════════════════════════════
+// EXCEL MEJORADO
+// ════════════════════════════════
+async function downloadExcel() {
+  if (!window._resumen) { await buildResumen(); }
+  const rows   = window._resumen || [];
+  const periodo= window._resumenPeriodo || '';
+  const [start,end] = periodo.split('|');
+  const todosMovs   = await dbGetAll('movimientos');
+  const movsSem = todosMovs.filter(m=>(!start||m.fecha>=start)&&(!end||m.fecha<=end))
+                           .sort((a,b)=>a.ts-b.ts);
 
-  // Hoja resumen
-  const data = [
-    ['Trabajador','Cuadrilla','Saldo Anterior','Desayunos','Comidas','Sodas','Total Semana','Abonado','Saldo Actual']
+  const wb = XLSX.utils.book_new();
+
+  // ── Hoja 1: RESUMEN ──────────────────────────────────
+  const wbData = [
+    // Título
+    [`CONTROL SEMANAL DE COMIDAS — ${start} al ${end}`,'','','','','','','',''],
+    ['Generado:', new Date().toLocaleString('es-MX', {timeZone: TZ}),'','','','','','',''],
+    [],
+    ['#','Nombre','Cuadrilla','Saldo Ant.','Desayunos','Comidas','Sodas','Total Semana','Abonado','Saldo Actual','Estado'],
   ];
-  rows.forEach(r => data.push([
-    r.nombre, r.cuadrilla, r.saldoPrev,
-    r.desayunos, r.comidas, r.sodas,
-    r.total, r.abonos, r.saldoActual
+  rows.forEach((r,i) => wbData.push([
+    i+1, r.nombre, r.cuadrilla||'—',
+    r.saldoPrev, r.des, r.com, r.sod,
+    r.total, r.abon, r.saldoActual,
+    r.saldoActual>0 ? `Debe $${r.saldoActual}` : 'Liquidado'
   ]));
-  const ws = XLSX.utils.aoa_to_sheet(data);
-  ws['!cols'] = [18,14,12,10,10,10,12,10,12].map(w => ({ wch: w }));
-  XLSX.utils.book_append_sheet(wb, ws, 'Resumen');
+  // Totales
+  wbData.push([]);
+  wbData.push(['','TOTALES','',
+    rows.reduce((s,r)=>s+r.saldoPrev,0),
+    rows.reduce((s,r)=>s+r.des,0),
+    rows.reduce((s,r)=>s+r.com,0),
+    rows.reduce((s,r)=>s+r.sod,0),
+    rows.reduce((s,r)=>s+r.total,0),
+    rows.reduce((s,r)=>s+r.abon,0),
+    rows.reduce((s,r)=>s+Math.max(0,r.saldoActual),0),
+    ''
+  ]);
 
-  // Hoja detalle movimientos
-  dbGetAll('movimientos').then(movs => {
-    const wb2Period = window._lastResumenPeriodo || '';
-    const [s, e] = wb2Period.includes(' al ') ? wb2Period.split(' al ') : ['',''];
-    const filt = movs.filter(m => (!s || m.fecha >= s) && (!e || m.fecha <= e));
-    const det  = [['Fecha','Hora','Día','Trabajador','Cuadrilla','Tipo','Monto','Nota']];
-    filt.sort((a,b) => a.ts - b.ts).forEach(m => det.push([
-      m.fecha, m.hora, m.diaSemana, m.trabajadorNombre,
-      m.cuadrilla, m.tipo, m.monto, m.nota || ''
-    ]));
-    const ws2 = XLSX.utils.aoa_to_sheet(det);
-    XLSX.utils.book_append_sheet(wb, ws2, 'Detalle');
+  const ws1 = XLSX.utils.aoa_to_sheet(wbData);
+  // Anchos de columna
+  ws1['!cols'] = [5,22,14,12,12,12,12,14,12,14,16].map(w=>({wch:w}));
+  // Merge título
+  ws1['!merges'] = [{ s:{r:0,c:0}, e:{r:0,c:10} }];
+  XLSX.utils.book_append_sheet(wb, ws1, 'Resumen');
 
-    const fecha = tzNow().date;
-    XLSX.writeFile(wb, `Control_Comidas_${fecha}.xlsx`);
-    showToast('📥 Excel descargado');
+  // ── Hoja 2: CONTROL SEMANAL (formato obra) ──────────
+  const dias   = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const encH1  = ['Nombre','Cuadrilla'];
+  const encH2  = ['',''];
+  dias.forEach(d => { encH1.push(d,'',''); encH2.push('Des','Com','Soda'); });
+  encH1.push('Total','Abonado','Saldo');
+  encH2.push('','','');
+  const semData = [encH1, encH2];
+  rows.forEach(r => {
+    // Obtener desglose por día
+    const mv_r = movsSem.filter(m=>m.trabajadorId==
+      (allWorkers.find(w=>w.nombre===r.nombre)?.id));
+    const byDay = {};
+    dias.forEach(d=>{byDay[d]={D:0,C:0,S:0};});
+    mv_r.forEach(m=>{
+      const d=m.diaSemana;
+      if(!byDay[d]) return;
+      if(m.tipo==='Desayuno') byDay[d].D+=m.monto;
+      else if(m.tipo==='Comida') byDay[d].C+=m.monto;
+      else if(m.tipo==='Soda')   byDay[d].S+=m.monto;
+    });
+    const fila=[r.nombre, r.cuadrilla||''];
+    dias.forEach(d=>{ fila.push(byDay[d].D||'',byDay[d].C||'',byDay[d].S||''); });
+    fila.push(r.total, r.abon, r.saldoActual);
+    semData.push(fila);
   });
+  const ws2 = XLSX.utils.aoa_to_sheet(semData);
+  ws2['!cols'] = [22,14,...Array(18).fill({wch:8}),12,12,12];
+  XLSX.utils.book_append_sheet(wb, ws2, 'Control_Semanal');
+
+  // ── Hoja 3: MOVIMIENTOS DETALLE ──────────────────────
+  const det = [['ID','Fecha','Hora','Día','Trabajador','Cuadrilla','Tipo','Monto','Nota','Sincronizado']];
+  movsSem.forEach(m => det.push([
+    m.remoteId||m.id, m.fecha, m.hora, m.diaSemana,
+    m.trabajadorNombre, m.cuadrilla||'', m.tipo, m.monto,
+    m.nota||'', m.synced?'Sí':'Pendiente'
+  ]));
+  const ws3 = XLSX.utils.aoa_to_sheet(det);
+  ws3['!cols'] = [10,12,8,12,22,14,12,10,20,12].map(w=>({wch:w}));
+  XLSX.utils.book_append_sheet(wb, ws3, 'Detalle_Movimientos');
+
+  // ── Hoja 4: DEUDORES ────────────────────────────────
+  const deudores = rows.filter(r=>r.saldoActual>0).sort((a,b)=>b.saldoActual-a.saldoActual);
+  const deudData = [
+    ['DEUDORES — Por cobrar',''],
+    [],
+    ['Nombre','Cuadrilla','Consumió','Abonó','Debe']
+  ];
+  deudores.forEach(r=>deudData.push([r.nombre,r.cuadrilla||'—',r.total+r.saldoPrev,r.abon,r.saldoActual]));
+  deudData.push([]);
+  deudData.push(['TOTAL POR COBRAR','','','',deudores.reduce((s,r)=>s+r.saldoActual,0)]);
+  const ws4 = XLSX.utils.aoa_to_sheet(deudData);
+  ws4['!cols'] = [22,14,12,12,12].map(w=>({wch:w}));
+  ws4['!merges'] = [{ s:{r:0,c:0}, e:{r:0,c:4} }];
+  XLSX.utils.book_append_sheet(wb, ws4, 'Deudores');
+
+  XLSX.writeFile(wb, `Comidas_${start}_${end}.xlsx`);
+  showToast('📥 Excel descargado con 4 hojas');
 }
 
-// ════════════════════════════════════════════════════════
-//  ABONOS (modal rápido)
-// ════════════════════════════════════════════════════════
-async function showAbonos() {
-  const movs = await dbGetAll('movimientos');
-  const wb   = getWeekBounds();
-  // Calcular deudores
-  const mapa = {};
-  movs.forEach(m => {
-    if (!mapa[m.trabajadorId])
-      mapa[m.trabajadorId] = { nombre: m.trabajadorNombre, cuadrilla: m.cuadrilla, consumido: 0, abonado: 0 };
-    if (m.tipo !== 'Abono') mapa[m.trabajadorId].consumido += m.monto;
-    else                    mapa[m.trabajadorId].abonado   += m.monto;
-  });
-  const deudores = Object.values(mapa).filter(d => d.consumido - d.abonado > 0)
-    .sort((a,b) => (b.consumido-b.abonado) - (a.consumido-a.abonado));
-
-  openModal('💵 Deudores', `
-    <div class="flex flex-col gap-2">
-      ${deudores.length ? deudores.map(d => `
-        <div class="flex justify-between items-center bg-gray-800 rounded-xl px-3 py-2.5">
-          <div>
-            <span class="font-semibold text-white">${d.nombre}</span>
-            <span class="text-xs text-gray-500 ml-1">${d.cuadrilla}</span>
-          </div>
-          <span class="font-black text-red-400">$${d.consumido - d.abonado}</span>
-        </div>
-      `).join('') : '<p class="text-green-400 text-center py-4">✓ Sin deudas pendientes</p>'}
-    </div>
-  `);
-}
-
-// ════════════════════════════════════════════════════════
-//  SYNC GOOGLE SHEETS
-// ════════════════════════════════════════════════════════
+// ════════════════════════════════
+// SYNC → SHEETS
+// ════════════════════════════════
 async function syncNow() {
-  const wh = await dbGet('config', 'webhook');
-  if (!wh || !wh.value) return;
-
-  const movs = await dbGetAll('movimientos');
-  const pending = movs.filter(m => !m.synced);
+  const wh = await dbGet('config','webhook');
+  if (!wh?.value) return;
+  const movs    = await dbGetAll('movimientos');
+  const pending = movs.filter(m=>!m.synced);
   if (!pending.length) return;
-
   try {
     const res = await fetch(wh.value, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ movimientos: pending })
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ action:'sync', movimientos: pending })
     });
     if (res.ok) {
-      for (const m of pending) {
-        m.synced = 1;
-        await dbPut('movimientos', m);
+      const data = await res.json();
+      // Sheets devuelve remoteIds asignados
+      for (let i=0; i<pending.length; i++) {
+        pending[i].synced   = 1;
+        pending[i].remoteId = data.remoteIds?.[i] ?? null;
+        await dbPut('movimientos', pending[i]);
       }
-      showToast(`☁️ ${pending.length} movimientos sincronizados`);
+      showToast(`☁️ ${pending.length} sincronizados`);
       updatePendingCount();
     }
-  } catch(e) {
-    console.warn('Sync error:', e);
-  }
+  } catch(e) { /* offline, no pasa nada */ }
+}
+
+// PULL desde Sheets (cuando borraron en el Excel)
+async function pullFromSheets() {
+  const wh = await dbGet('config','webhook');
+  if (!wh?.value) { showToast('⚠️ Configura el webhook primero'); return; }
+  if (!navigator.onLine) { showToast('⚠️ Necesitas conexión'); return; }
+  showToast('⬇ Importando desde Sheets…');
+  try {
+    const res  = await fetch(`${wh.value}?action=pull`);
+    const data = await res.json();
+    if (!data.movimientos) { showToast('❌ Sin datos'); return; }
+    // Reemplazar movimientos sincronizados con los de Sheets
+    const locales   = await dbGetAll('movimientos');
+    const pendientes= locales.filter(m=>!m.synced);
+    // Borrar todos los sincronizados
+    for (const m of locales.filter(m=>m.synced)) await dbDel('movimientos', m.id);
+    // Insertar los de Sheets
+    for (const m of data.movimientos) {
+      await dbAdd('movimientos', { ...m, synced:1 });
+    }
+    renderLogHoy();
+    showToast(`✅ Importados ${data.movimientos.length} registros`);
+  } catch(e) { showToast('❌ Error al importar: '+e.message); }
 }
 
 async function updatePendingCount() {
-  const movs    = await dbGetAll('movimientos');
-  const pending = movs.filter(m => !m.synced).length;
-  document.getElementById('cnt-pending').textContent = pending;
-  document.getElementById('lbl-pending').classList.toggle('hidden', pending === 0);
-  document.getElementById('btn-sync').classList.toggle('hidden', pending === 0 || !navigator.onLine);
+  const movs = await dbGetAll('movimientos');
+  const n    = movs.filter(m=>!m.synced).length;
+  document.getElementById('cnt-pending').textContent = n;
+  document.getElementById('lbl-pending').style.display = n>0?'inline':'none';
+  document.getElementById('btn-sync').style.display =
+    (n>0 && navigator.onLine) ? 'inline-block' : 'none';
 }
 
 function updateStatusBar() {
-  const online = navigator.onLine;
-  document.getElementById('dot-online').className =
-    `w-2 h-2 rounded-full ${online ? 'bg-green-400' : 'bg-red-400'}`;
-  document.getElementById('lbl-online').textContent = online ? 'En línea' : 'Sin conexión';
-  updatePendingCount();
+  const on = navigator.onLine;
+  const dot = document.getElementById('dot-status');
+  dot.style.background = on ? 'var(--green)' : 'var(--red)';
+  document.getElementById('lbl-status').textContent = on ? 'En línea' : 'Sin conexión';
 }
 
-// ════════════════════════════════════════════════════════
-//  CONFIG — CUADRILLAS
-// ════════════════════════════════════════════════════════
-async function addCuadrilla() {
-  const val = document.getElementById('inp-nueva-cuadrilla').value.trim();
-  if (!val || allCuadrillas.includes(val)) return;
-  allCuadrillas.push(val);
-  await dbPut('config', { key: 'cuadrillas', value: allCuadrillas });
-  document.getElementById('inp-nueva-cuadrilla').value = '';
-  renderCuadrillasSelect();
-  renderCuadrillasCfg();
-  showToast(`Cuadrilla "${val}" agregada`);
-}
-
-function renderCuadrillasCfg() {
-  document.getElementById('list-cuadrillas').innerHTML = allCuadrillas.length
-    ? allCuadrillas.map(c => `
-      <div class="flex justify-between items-center bg-gray-800 rounded-xl px-3 py-2">
-        <span class="font-semibold text-white">${c}</span>
-        <button onclick="deleteCuadrilla('${c}')" class="text-red-500 text-sm">✕</button>
-      </div>
-    `).join('')
-    : '<p class="text-gray-600 text-xs">Sin cuadrillas</p>';
-}
-
-async function deleteCuadrilla(name) {
-  if (!confirm(`¿Eliminar cuadrilla "${name}"?`)) return;
-  allCuadrillas = allCuadrillas.filter(c => c !== name);
-  await dbPut('config', { key: 'cuadrillas', value: allCuadrillas });
-  renderCuadrillasSelect();
-  renderCuadrillasCfg();
-}
-
-// ════════════════════════════════════════════════════════
-//  CONFIG — TRABAJADORES
-// ════════════════════════════════════════════════════════
-function renderWorkersCfg() {
-  const q = document.getElementById('inp-search-cfg').value.toLowerCase();
-  let list = allWorkers;
-  if (q) list = list.filter(w => w.nombre.toLowerCase().includes(q));
-  document.getElementById('list-workers-cfg').innerHTML = list.map(w => `
-    <div class="flex justify-between items-center bg-gray-800 rounded-xl px-3 py-2.5">
-      <div>
-        <span class="font-semibold text-white text-sm">${w.nombre}</span>
-        <span class="text-xs text-gray-500 ml-1">${w.cuadrilla}</span>
-      </div>
-      <div class="flex gap-2">
-        <button onclick="openEditWorker(${w.id})" class="text-blue-400 text-sm">✏️</button>
-        <button onclick="deleteWorker(${w.id})" class="text-red-500 text-sm">✕</button>
-      </div>
-    </div>
-  `).join('') || '<p class="text-gray-600 text-xs text-center py-3">Sin resultados</p>';
-}
-
-function openAddWorker() {
-  openModal('➕ Nuevo Trabajador', workerForm(null));
-}
-
-async function openEditWorker(id) {
-  const w = allWorkers.find(w => w.id === id);
-  openModal('✏️ Editar Trabajador', workerForm(w));
-}
-
-function workerForm(w) {
-  const cuadOpts = allCuadrillas.map(c =>
-    `<option value="${c}" ${w && w.cuadrilla===c?'selected':''}>${c}</option>`
-  ).join('');
-  return `
-    <div class="flex flex-col gap-3">
-      <div>
-        <p class="text-xs text-gray-500 mb-1">Nombre / Apodo</p>
-        <input id="wf-nombre" type="text" value="${w ? w.nombre : ''}" placeholder="Nombre completo o apodo"/>
-      </div>
-      <div>
-        <p class="text-xs text-gray-500 mb-1">Cuadrilla</p>
-        <select id="wf-cuadrilla">
-          <option value="">Sin cuadrilla</option>
-          ${cuadOpts}
-        </select>
-      </div>
-      <button onclick="saveWorker(${w ? w.id : 'null'})"
-        class="btn-main bg-blue-600 text-white w-full py-4 text-base">
-        ${w ? 'Guardar cambios' : 'Agregar trabajador'}
-      </button>
-      ${w ? `<button onclick="deleteWorker(${w.id})" class="btn-main bg-red-900 text-red-300 w-full py-3 text-sm">Eliminar trabajador</button>` : ''}
-    </div>
-  `;
-}
-
-async function saveWorker(id) {
-  const nombre   = document.getElementById('wf-nombre').value.trim();
-  const cuadrilla= document.getElementById('wf-cuadrilla').value;
-  if (!nombre) { showToast('⚠️ Escribe un nombre'); return; }
-  if (id === null || id === 'null') {
-    await dbAdd('trabajadores', { nombre, cuadrilla });
-  } else {
-    const w = allWorkers.find(w => w.id === id);
-    await dbPut('trabajadores', { ...w, nombre, cuadrilla });
-  }
-  await loadWorkers();
-  closeModal();
-  showToast(`✅ ${nombre} guardado`);
-}
-
-async function deleteWorker(id) {
-  if (!confirm('¿Eliminar este trabajador? Sus movimientos se conservan.')) return;
-  await dbDelete('trabajadores', id);
-  await loadWorkers();
-  closeModal();
-  showToast('Trabajador eliminado');
-}
-
-// ════════════════════════════════════════════════════════
-//  WEBHOOK
-// ════════════════════════════════════════════════════════
-async function saveWebhook() {
-  const val = document.getElementById('inp-webhook').value.trim();
-  await dbPut('config', { key: 'webhook', value: val });
-  showToast('✅ URL guardada');
-}
-
-// ════════════════════════════════════════════════════════
-//  BACKUP
-// ════════════════════════════════════════════════════════
-async function exportBackup() {
-  const movs    = await dbGetAll('movimientos');
-  const workers = await dbGetAll('trabajadores');
-  const blob    = new Blob([JSON.stringify({ movimientos: movs, trabajadores: workers, exportedAt: new Date().toISOString() }, null, 2)], { type: 'application/json' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `backup_obra_${tzNow().date}.json`;
-  a.click();
-  showToast('📦 Backup exportado');
-}
-
-function showImport() {
-  document.getElementById('file-import').click();
-}
-
-async function importBackup(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  const text = await file.text();
-  const data = JSON.parse(text);
-  if (!confirm(`¿Importar ${data.trabajadores?.length||0} trabajadores y ${data.movimientos?.length||0} movimientos?`)) return;
-  for (const w of (data.trabajadores||[])) {
-    const { id, ...rest } = w;
-    await dbPut('trabajadores', w);
-  }
-  for (const m of (data.movimientos||[])) {
-    await dbPut('movimientos', m);
-  }
-  await loadWorkers();
-  showToast('✅ Backup importado');
-}
-
-async function limpiarSemana() {
-  const wb = getWeekBounds();
-  if (!confirm(`¿Eliminar todos los movimientos ANTERIORES a la semana ${wb.label}?`)) return;
+// ════════════════════════════════
+// HISTORIAL SEMANAS
+// ════════════════════════════════
+async function loadHistWeeks() {
   const movs = await dbGetAll('movimientos');
-  const viejos = movs.filter(m => m.fecha < wb.start);
-  for (const m of viejos) await dbDelete('movimientos', m.id);
-  showToast(`🗑️ ${viejos.length} registros eliminados`);
-}
-
-async function loadHistoricalWeeks() {
-  const movs = await dbGetAll('movimientos');
-  if (!movs.length) return;
-  // Encontrar semanas únicas
-  const semanas = new Set();
+  const sems  = new Set();
   movs.forEach(m => {
-    const d = new Date(m.fecha + 'T12:00:00');
+    const d = new Date(m.fecha+'T12:00:00');
     const dow = d.getDay();
-    const diff = dow === 0 ? -6 : 1 - dow;
-    const mon = new Date(d); mon.setDate(d.getDate() + diff);
-    const sat = new Date(mon); sat.setDate(mon.getDate() + 5);
-    const iso = d => d.toISOString().split('T')[0];
-    semanas.add(`${iso(mon)}|${iso(sat)}`);
+    const diff= dow===0?-6:1-dow;
+    const mon = new Date(d); mon.setDate(d.getDate()+diff);
+    const sat = new Date(mon); sat.setDate(mon.getDate()+5);
+    const iso = x=>x.toISOString().split('T')[0];
+    sems.add(`${iso(mon)}|${iso(sat)}`);
   });
   const sel = document.getElementById('sel-semana');
   sel.innerHTML = '<option value="current">Semana actual</option>';
-  [...semanas].sort().reverse().forEach(s => {
-    const [st, en] = s.split('|');
-    const o = document.createElement('option');
-    o.value = s;
-    o.textContent = `${st} → ${en}`;
+  [...sems].sort().reverse().forEach(s=>{
+    const [a,b]=s.split('|');
+    const o=document.createElement('option'); o.value=s; o.textContent=`${a} → ${b}`;
     sel.appendChild(o);
   });
 }
 
-// ════════════════════════════════════════════════════════
-//  MODAL
-// ════════════════════════════════════════════════════════
+// ════════════════════════════════
+// CONFIG — CUADRILLAS
+// ════════════════════════════════
+function renderCuadSelects() {
+  ['sel-cuadrilla','sel-res-cuad'].forEach(id=>{
+    const el=document.getElementById(id); if(!el) return;
+    el.innerHTML='<option value="">Todas</option>';
+    allCuad.forEach(c=>{ const o=document.createElement('option'); o.value=o.textContent=c; el.appendChild(o); });
+  });
+}
+function renderCuadList() {
+  const el = document.getElementById('list-cuad');
+  if (!el) return;
+  el.innerHTML = allCuad.length
+    ? allCuad.map(c=>`
+      <div style="display:flex;justify-content:space-between;align-items:center;
+        background:var(--bg);border-radius:10px;padding:10px 14px;">
+        <span style="font-weight:600;">${c}</span>
+        <button onclick="delCuad('${c}')" style="background:var(--red-l);color:var(--red);border:none;border-radius:8px;padding:4px 10px;font-weight:700;cursor:pointer;">✕</button>
+      </div>
+    `).join('')
+    : '<p style="color:var(--text3);font-size:.85rem;">Sin cuadrillas</p>';
+}
+async function addCuadrilla() {
+  const v=document.getElementById('inp-new-cuad').value.trim();
+  if(!v||allCuad.includes(v)) return;
+  allCuad.push(v);
+  await dbPut('config',{key:'cuadrillas',value:allCuad});
+  document.getElementById('inp-new-cuad').value='';
+  renderCuadSelects(); renderCuadList();
+  showToast(`Cuadrilla "${v}" agregada`);
+}
+async function delCuad(name) {
+  if(!confirm(`¿Eliminar "${name}"?`)) return;
+  allCuad=allCuad.filter(c=>c!==name);
+  await dbPut('config',{key:'cuadrillas',value:allCuad});
+  renderCuadSelects(); renderCuadList();
+}
+
+// ════════════════════════════════
+// CONFIG — TRABAJADORES
+// ════════════════════════════════
+function renderWorkersCfg() {
+  const q = document.getElementById('inp-cfg-search').value.toLowerCase();
+  let list= allWorkers;
+  if(q) list=list.filter(w=>w.nombre.toLowerCase().includes(q));
+  document.getElementById('list-workers-cfg').innerHTML = list.length
+    ? list.map(w=>`
+      <div style="display:flex;justify-content:space-between;align-items:center;
+        background:var(--bg);border-radius:12px;padding:11px 14px;">
+        <div>
+          <div style="font-weight:600;">${w.nombre}</div>
+          <div style="font-size:.75rem;color:var(--text3);">${w.cuadrilla||'Sin cuadrilla'}</div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button onclick="openEditWorker(${w.id})" style="background:var(--blue-l);color:var(--blue);border:none;border-radius:8px;padding:6px 12px;font-weight:600;cursor:pointer;">✏️</button>
+          <button onclick="delWorker(${w.id})" style="background:var(--red-l);color:var(--red);border:none;border-radius:8px;padding:6px 10px;font-weight:700;cursor:pointer;">✕</button>
+        </div>
+      </div>
+    `).join('')
+    : '<p style="color:var(--text3);text-align:center;padding:16px;font-size:.88rem;">Sin resultados</p>';
+}
+
+function openAddWorker()  { openModal('➕ Nuevo trabajador', workerForm(null)); }
+function openEditWorker(id){ openModal('✏️ Editar', workerForm(allWorkers.find(w=>w.id===id))); }
+
+function workerForm(w) {
+  const opts=allCuad.map(c=>`<option value="${c}"${w?.cuadrilla===c?' selected':''}>${c}</option>`).join('');
+  return `<div style="display:flex;flex-direction:column;gap:12px;">
+    <div>
+      <p class="sec-label">Nombre / Apodo</p>
+      <input id="wf-nom" type="text" value="${w?.nombre||''}" placeholder="Nombre completo o apodo"/>
+    </div>
+    <div>
+      <p class="sec-label">Cuadrilla</p>
+      <select id="wf-cuad"><option value="">Sin cuadrilla</option>${opts}</select>
+    </div>
+    <button class="btn-primary" onclick="saveWorker(${w?w.id:'null'})" style="margin-top:4px;">
+      ${w?'Guardar cambios':'Agregar trabajador'}
+    </button>
+    ${w?`<button onclick="delWorker(${w.id})" class="btn-primary red" style="margin-top:4px;">Eliminar</button>`:''}
+  </div>`;
+}
+
+async function saveWorker(id) {
+  const nombre=document.getElementById('wf-nom').value.trim();
+  const cuad  =document.getElementById('wf-cuad').value;
+  if(!nombre){ showToast('⚠️ Escribe un nombre'); return; }
+  if(id===null||id==='null') await dbAdd('trabajadores',{nombre,cuadrilla:cuad});
+  else { const w=allWorkers.find(w=>w.id===id); await dbPut('trabajadores',{...w,nombre,cuadrilla:cuad}); }
+  await loadWorkers();
+  renderWorkersCfg();
+  closeModal();
+  showToast(`✅ ${nombre} guardado`);
+}
+
+async function delWorker(id) {
+  if(!confirm('¿Eliminar trabajador? Sus movimientos se conservan.')) return;
+  await dbDel('trabajadores',id);
+  await loadWorkers();
+  renderWorkersCfg();
+  closeModal();
+  showToast('Trabajador eliminado');
+}
+
+// ════════════════════════════════
+// WEBHOOK
+// ════════════════════════════════
+async function saveWebhook() {
+  const v=document.getElementById('inp-webhook').value.trim();
+  await dbPut('config',{key:'webhook',value:v});
+  showToast('✅ URL guardada');
+}
+
+// ════════════════════════════════
+// BACKUP
+// ════════════════════════════════
+async function exportBackup() {
+  const m=await dbGetAll('movimientos'), w=await dbGetAll('trabajadores');
+  const blob=new Blob([JSON.stringify({movimientos:m,trabajadores:w,ts:Date.now()},null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download=`backup_${tzNow().date}.json`; a.click();
+  showToast('📦 Backup exportado');
+}
+async function importBackup(e) {
+  const file=e.target.files[0]; if(!file) return;
+  const data=JSON.parse(await file.text());
+  if(!confirm(`¿Importar ${data.trabajadores?.length||0} trabajadores y ${data.movimientos?.length||0} movimientos?`)) return;
+  for(const w of(data.trabajadores||[])) await dbPut('trabajadores',w);
+  for(const m of(data.movimientos||[])) await dbPut('movimientos',m);
+  await loadWorkers(); showToast('✅ Importado');
+}
+async function limpiarSemana() {
+  const wb=getWeekBounds();
+  if(!confirm(`¿Eliminar movimientos anteriores al ${wb.start}?`)) return;
+  const movs=await dbGetAll('movimientos');
+  let n=0;
+  for(const m of movs.filter(m=>m.fecha<wb.start && m.synced)) { await dbDel('movimientos',m.id); n++; }
+  showToast(`🗑️ ${n} registros eliminados`);
+}
+
+// ════════════════════════════════
+// MODAL — completamente nativo
+// ════════════════════════════════
 function openModal(title, content) {
   document.getElementById('modal-title').textContent = title;
-  document.getElementById('modal-content').innerHTML = content;
-  document.getElementById('modal-overlay').classList.remove('hidden');
+  document.getElementById('modal-body').innerHTML    = content;
+  document.getElementById('modal-overlay').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
 }
 function closeModal() {
-  document.getElementById('modal-overlay').classList.add('hidden');
+  document.getElementById('modal-overlay').style.display = 'none';
+  document.body.style.overflow = '';
 }
-function closeModalIfOverlay(e) {
+function handleOverlayClick(e) {
   if (e.target === document.getElementById('modal-overlay')) closeModal();
 }
 
-// ════════════════════════════════════════════════════════
-//  TOAST
-// ════════════════════════════════════════════════════════
+// ════════════════════════════════
+// TOAST
+// ════════════════════════════════
+let _toastTimer;
 function showToast(msg) {
-  const el = document.createElement('div');
-  el.className = 'toast';
+  const el = document.getElementById('toast');
   el.textContent = msg;
-  document.body.appendChild(el);
-  setTimeout(() => el.remove(), 2600);
+  el.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(()=>el.classList.remove('show'), 2400);
 }
 
-// ════════════════════════════════════════════════════════
-//  START
-// ════════════════════════════════════════════════════════
+// ════════════════════════════════
+// START
+// ════════════════════════════════
 init();
 </script>
 </body>
