@@ -1,9 +1,20 @@
 {
-  "name": "Control de Comidas",
-  "short_name": "Comidas Obra",
+  "name": "Obra Comidas",
+  "short_name": "ObraComidas",
+  "description": "Control semanal de comidas y cobros en obra",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#f3f4f6",
+  "background_color": "#030712",
   "theme_color": "#111827",
-  "icons": []
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23111827' rx='20'/><text y='.9em' font-size='80' x='10'>🏗️</text></svg>",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "utilities"],
+  "lang": "es-MX"
 }
