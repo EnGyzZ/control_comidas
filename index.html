@@ -269,7 +269,7 @@
     </div>
   </div>
 
-  <!-- MODAL: CONFIGURACIÓN WEBHOOK GOOGLE SHEETS -->
+ <!-- MODAL: CONFIGURACIÓN WEBHOOK GOOGLE SHEETS -->
   <div id="modalConfig" class="fixed inset-0 bg-black/75 z-50 hidden flex items-center justify-center p-4">
     <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-lg w-full p-5 space-y-4">
       <h3 class="text-lg font-black text-white">Configuración de Sincronización</h3>
@@ -278,6 +278,15 @@
         <label class="text-xs text-slate-400 block mb-1">URL del Webhook (Google Apps Script)</label>
         <input id="inputWebhookUrl" type="url" placeholder="https://script.google.com/macros/s/.../exec" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white font-mono" />
       </div>
+
+      <!-- ZONA DE LIMPIEZA TOTAL -->
+      <div class="pt-3 border-t border-slate-700 flex items-center justify-between">
+        <span class="text-xs text-slate-400">¿Dejar la app en blanco?</span>
+        <button onclick="resetearAppDeFabrica()" class="px-3 py-1.5 rounded-xl bg-rose-600/20 border border-rose-500/40 text-rose-300 hover:bg-rose-600/40 text-xs font-bold">
+          🗑️ Borrar Todo de Fábrica
+        </button>
+      </div>
+
       <div class="flex justify-end gap-2 pt-2">
         <button onclick="cerrarModalConfig()" class="px-4 py-2 rounded-xl bg-slate-700 text-slate-300 text-sm font-bold">Cerrar</button>
         <button onclick="guardarConfigWebhook()" class="px-4 py-2 rounded-xl bg-amber-500 text-slate-950 text-sm font-black">Guardar URL</button>
@@ -424,22 +433,46 @@
       estado.trabajadores = await dbGetAll('trabajadores');
       estado.movimientos = await dbGetAll('movimientos');
 
-      if (estado.trabajadores.length === 0) {
-        const semilla = [
-          { id: 'T1', nombre: 'Juan "El Chino"', cuadrilla: 'Carpinteros', saldoAnterior: 0 },
-          { id: 'T2', nombre: 'Maestro Roberto', cuadrilla: 'Carpinteros', saldoAnterior: 120 },
-          { id: 'T3', nombre: 'Carlos "El Güero"', cuadrilla: 'Loseta', saldoAnterior: 0 },
-          { id: 'T4', nombre: 'Miguel Ángel', cuadrilla: 'Loseta', saldoAnterior: 50 },
-          { id: 'T5', nombre: 'Don Chuy', cuadrilla: 'Albañiles', saldoAnterior: 0 },
-          { id: 'T6', nombre: 'Pedro Fierrero', cuadrilla: 'Fierreros', saldoAnterior: 0 }
-        ];
-        for (const t of semilla) await dbPut('trabajadores', t);
-        estado.trabajadores = semilla;
-      }
-
       actualizarRelojUI();
       actualizarEstadoRed();
       renderTodo();
+    }
+
+    // Borrar un solo trabajador y su historial
+    async function eliminarTrabajador(id, event) {
+      if (event) event.stopPropagation();
+      const trab = estado.trabajadores.find(t => t.id === id);
+      if (!trab) return;
+      if (!confirm(`¿Seguro que deseas eliminar a "${trab.nombre}" y todos sus registros?`)) return;
+
+      await dbDelete('trabajadores', id);
+      estado.trabajadores = estado.trabajadores.filter(t => t.id !== id);
+
+      const movsDelTrabajador = estado.movimientos.filter(m => m.trabajadorId === id);
+      for (const m of movsDelTrabajador) {
+        await dbDelete('movimientos', m.uuid);
+      }
+      estado.movimientos = estado.movimientos.filter(m => m.trabajadorId !== id);
+
+      if (estado.trabajadorSeleccionadoId === id) {
+        estado.trabajadorSeleccionadoId = null;
+      }
+
+      renderTodo();
+      mostrarToast(`🗑️ Trabajador eliminado: ${trab.nombre}`);
+    }
+
+    // Dejar toda la app en cero como nueva
+    async function resetearAppDeFabrica() {
+      if (!confirm('⚠️ ¿Estás seguro de BORRAR TODOS los trabajadores y TODOS los cobros de la app para dejarla en cero?')) return;
+      await dbClear('trabajadores');
+      await dbClear('movimientos');
+      estado.trabajadores = [];
+      estado.movimientos = [];
+      estado.trabajadorSeleccionadoId = null;
+      cerrarModalConfig();
+      renderTodo();
+      mostrarToast('✨ App limpia y lista desde cero');
     }
 
     function renderTodo() {
@@ -455,7 +488,7 @@
     // 4. LÓGICA DE INTERFAZ: PESTAÑA 1 (REGISTRO ULTRA RÁPIDO)
     // =========================================================================
     function obtenerCuadrillasUnicas() {
-      const set = new Set(['Carpinteros', 'Loseta', 'Albañiles', 'Fierreros']);
+      const set = new Set(['']);
       estado.trabajadores.forEach(t => { if (t.cuadrilla) set.add(t.cuadrilla); });
       return ['TODAS', ...Array.from(set)];
     }
