@@ -30,11 +30,14 @@
         </div>
       </div>
 
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-1.5">
         <button onclick="sincronizarConSheets()" id="btnSync" class="btn-active flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow">
           <span id="syncIcon">🔄</span>
           <span>Sincronizar</span>
           <span id="badgePendientes" class="bg-amber-400 text-slate-950 px-1.5 py-0.2 rounded-full text-xs font-extrabold">0</span>
+        </button>
+        <button onclick="resetearAppDeFabrica()" class="btn-active bg-rose-600/20 hover:bg-rose-600/40 text-rose-300 border border-rose-500/40 text-xs font-bold px-2.5 py-1.5 rounded-lg" title="Dejar toda la app en blanco">
+          🗑️ Limpiar App
         </button>
         <button onclick="abrirModalConfig()" class="btn-active bg-slate-800 hover:bg-slate-700 text-slate-300 p-1.5 rounded-lg border border-slate-700" title="Configurar Google Sheets">
           ⚙️
@@ -79,7 +82,7 @@
       </div>
 
       <!-- Grid de botones de trabajadores -->
-      <div id="gridTrabajadores" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 max-h-48 overflow-y-auto pr-1"></div>
+      <div id="gridTrabajadores" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 max-h-56 overflow-y-auto pr-1"></div>
 
       <!-- Indicador del Trabajador Seleccionado -->
       <div id="bannerTrabajadorSeleccionado" class="mt-3 hidden bg-slate-900 border border-amber-500/40 rounded-xl p-2.5 flex items-center justify-between">
@@ -138,13 +141,11 @@
 
       <!-- Botón Gigante $80 + Botones Rápidos -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-        <!-- Botón Estándar $80 -->
         <button onclick="sumarMonto(80)" class="btn-active sm:col-span-1 bg-gradient-to-br from-amber-400 to-amber-600 text-slate-950 rounded-2xl py-5 px-4 flex flex-col items-center justify-center shadow-lg border-2 border-amber-300">
           <span class="text-xs font-black uppercase tracking-wider opacity-80">Costo Estándar</span>
           <span class="text-4xl font-black tracking-tight">+$80</span>
         </button>
 
-        <!-- Botones Secundarios -->
         <div class="sm:col-span-2 grid grid-cols-3 gap-2">
           <button onclick="sumarMonto(1)" class="btn-active bg-slate-900 hover:bg-slate-700 border border-slate-600 rounded-xl py-3 text-lg font-extrabold text-white">+$1</button>
           <button onclick="sumarMonto(5)" class="btn-active bg-slate-900 hover:bg-slate-700 border border-slate-600 rounded-xl py-3 text-lg font-extrabold text-white">+$5</button>
@@ -173,7 +174,6 @@
        VISTA 2: RESUMEN SEMANAL Y COBROS
        ========================================== -->
   <main id="vistaResumen" class="hidden max-w-5xl mx-auto px-3 pt-3 space-y-4">
-    <!-- Tarjetas de Totales Globales -->
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
       <div class="bg-slate-800 border border-slate-700 p-3 rounded-xl">
         <span class="text-xs text-slate-400 block">Saldos Anteriores</span>
@@ -193,7 +193,6 @@
       </div>
     </div>
 
-    <!-- Barra de Herramientas y Exportación Excel -->
     <div class="bg-slate-800 border border-slate-700 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-2">
       <div class="flex items-center gap-2">
         <select id="filtroResumenCuadrilla" onchange="renderTablaResumen()" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-white">
@@ -212,7 +211,6 @@
       </div>
     </div>
 
-    <!-- Tabla de Resumen Semanal -->
     <div class="bg-slate-800 border border-slate-700 rounded-2xl overflow-hidden shadow">
       <div class="overflow-x-auto">
         <table class="w-full text-left border-collapse text-xs">
@@ -269,7 +267,7 @@
     </div>
   </div>
 
- <!-- MODAL: CONFIGURACIÓN WEBHOOK GOOGLE SHEETS -->
+  <!-- MODAL: CONFIGURACIÓN WEBHOOK GOOGLE SHEETS -->
   <div id="modalConfig" class="fixed inset-0 bg-black/75 z-50 hidden flex items-center justify-center p-4">
     <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-lg w-full p-5 space-y-4">
       <h3 class="text-lg font-black text-white">Configuración de Sincronización</h3>
@@ -281,8 +279,8 @@
 
       <!-- ZONA DE LIMPIEZA TOTAL -->
       <div class="pt-3 border-t border-slate-700 flex items-center justify-between">
-        <span class="text-xs text-slate-400">¿Dejar la app en blanco?</span>
-        <button onclick="resetearAppDeFabrica()" class="px-3 py-1.5 rounded-xl bg-rose-600/20 border border-rose-500/40 text-rose-300 hover:bg-rose-600/40 text-xs font-bold">
+        <span class="text-xs text-slate-400">¿Dejar la app completamente en cero?</span>
+        <button onclick="resetearAppDeFabrica()" class="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-extrabold shadow">
           🗑️ Borrar Todo de Fábrica
         </button>
       </div>
@@ -356,7 +354,6 @@
     const DB_VERSION = 1;
     let db = null;
 
-    // Estado en memoria para respuesta instantánea en UI
     let estado = {
       trabajadores: [],
       movimientos: [],
@@ -426,7 +423,7 @@
     }
 
     // =========================================================================
-    // 3. CARGA INICIAL Y DATOS SEMILLA DE EJEMPLO
+    // 3. CARGA INICIAL Y FUNCIONES DE BORRADO
     // =========================================================================
     async function cargarDatosIniciales() {
       await initDB();
@@ -438,7 +435,6 @@
       renderTodo();
     }
 
-    // Borrar un solo trabajador y su historial
     async function eliminarTrabajador(id, event) {
       if (event) event.stopPropagation();
       const trab = estado.trabajadores.find(t => t.id === id);
@@ -462,7 +458,6 @@
       mostrarToast(`🗑️ Trabajador eliminado: ${trab.nombre}`);
     }
 
-    // Dejar toda la app en cero como nueva
     async function resetearAppDeFabrica() {
       if (!confirm('⚠️ ¿Estás seguro de BORRAR TODOS los trabajadores y TODOS los cobros de la app para dejarla en cero?')) return;
       await dbClear('trabajadores');
@@ -488,8 +483,10 @@
     // 4. LÓGICA DE INTERFAZ: PESTAÑA 1 (REGISTRO ULTRA RÁPIDO)
     // =========================================================================
     function obtenerCuadrillasUnicas() {
-      const set = new Set(['']);
-      estado.trabajadores.forEach(t => { if (t.cuadrilla) set.add(t.cuadrilla); });
+      const set = new Set();
+      estado.trabajadores.forEach(t => {
+        if (t.cuadrilla && t.cuadrilla.trim() !== '') set.add(t.cuadrilla.trim());
+      });
       return ['TODAS', ...Array.from(set)];
     }
 
@@ -507,7 +504,7 @@
 
       const valActual = selectResumen.value || 'TODAS';
       selectResumen.innerHTML = cuadrillas.map(c => `<option value="${c}">${c === 'TODAS' ? 'Todas las cuadrillas' : c}</option>`).join('');
-      selectResumen.value = valActual;
+      selectResumen.value = cuadrillas.includes(valActual) ? valActual : 'TODAS';
     }
 
     function filtrarPorCuadrilla(cuadrilla) {
@@ -557,19 +554,27 @@
         return coincideCuadrilla && coincideTexto;
       });
 
+      if (filtrados.length === 0) {
+        grid.innerHTML = `<div class="col-span-full text-center py-4 text-xs text-slate-400">No hay trabajadores registrados. Toca <b>"+ Nuevo Trabajador"</b> arriba a la derecha.</div>`;
+        return;
+      }
+
       grid.innerHTML = filtrados.map(t => {
         const seleccionado = estado.trabajadorSeleccionadoId === t.id;
         const { saldoActual } = calcularMetricasTrabajador(t.id);
         return `
-          <button onclick="seleccionarTrabajador('${t.id}')" class="btn-active text-left p-2.5 rounded-xl border-2 transition-all flex flex-col justify-between ${
+          <div onclick="seleccionarTrabajador('${t.id}')" class="cursor-pointer btn-active text-left p-2.5 rounded-xl border-2 transition-all flex flex-col justify-between ${
             seleccionado ? 'bg-amber-500/20 border-amber-400' : 'bg-slate-900 border-slate-700 hover:border-slate-500'
           }">
-            <div class="font-extrabold text-sm text-white truncate">${t.nombre}</div>
-            <div class="flex items-center justify-between mt-1">
+            <div class="flex items-center justify-between gap-1">
+              <span class="font-extrabold text-sm text-white truncate">${t.nombre}</span>
+              <button onclick="eliminarTrabajador('${t.id}', event)" class="text-rose-400 hover:bg-rose-500/20 rounded px-1.5 py-0.5 text-xs font-black" title="Eliminar trabajador">✕</button>
+            </div>
+            <div class="flex items-center justify-between mt-1.5">
               <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">${t.cuadrilla}</span>
               <span class="text-xs font-black ${saldoActual > 0 ? 'text-rose-400' : 'text-emerald-400'}">$${saldoActual}</span>
             </div>
-          </button>
+          </div>
         `;
       }).join('');
     }
@@ -765,11 +770,14 @@
                 ${m.saldoActual > 0 ? `$${m.saldoActual}` : 'LIQUIDADO'}
               </td>
               <td class="p-2.5 text-center">
-                ${m.saldoActual > 0 ? `
-                  <button onclick="liquidarCuentaTrabajador('${t.id}', ${m.saldoActual})" class="btn-active bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold px-2.5 py-1 rounded-lg">
-                    Liquidar $${m.saldoActual}
-                  </button>
-                ` : `<span class="text-emerald-400 text-xs">✓</span>`}
+                <div class="flex items-center justify-center gap-1.5">
+                  ${m.saldoActual > 0 ? `
+                    <button onclick="liquidarCuentaTrabajador('${t.id}', ${m.saldoActual})" class="btn-active bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold px-2.5 py-1 rounded-lg">
+                      Liquidar $${m.saldoActual}
+                    </button>
+                  ` : `<span class="text-emerald-400 text-xs font-bold">✓</span>`}
+                  <button onclick="eliminarTrabajador('${t.id}', event)" class="text-rose-400 hover:bg-rose-500/20 px-1.5 py-1 rounded text-xs font-bold" title="Eliminar trabajador">🗑️</button>
+                </div>
               </td>
             </tr>
           `;
@@ -808,7 +816,6 @@
       mostrarToast(`💵 Cuenta liquidada: ${trab.nombre} ($${montoPendiente})`);
     }
 
-    // Exportar estructura idéntica a Control_Semanal_Comidas.xlsx (Lunes a Sábado por Desayuno, Comida, Soda)
     function exportarExcelLocal() {
       if (typeof XLSX === 'undefined') {
         mostrarToast('⚠️ Librería Excel no disponible');
@@ -924,7 +931,6 @@
       btn.disabled = true;
 
       try {
-        // Se usa text/plain para evitar bloqueo CORS preflight de Google Apps Script
         const res = await fetch(estado.webhookUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -1035,7 +1041,7 @@
 
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js').catch(() => {});
+        navigator.serviceWorker.register('./sw.js').then(reg => reg.update()).catch(() => {});
       });
     }
 
