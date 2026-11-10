@@ -1,1410 +1,1012 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
-<meta name="theme-color" content="#6B7280"/>
-<meta name="apple-mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
-<title>Obra Comidas</title>
-<link rel="manifest" href="manifest.json"/>
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
-<style>
-:root {
-  --bg:       #F2F2F7;
-  --card:     #FFFFFF;
-  --card2:    #F9F9FB;
-  --border:   #E5E5EA;
-  --text:     #1C1C1E;
-  --text2:    #6D6D72;
-  --text3:    #AEAEB2;
-  --blue:     #007AFF;
-  --blue-l:   #E8F2FF;
-  --green:    #34C759;
-  --green-l:  #E8F8EC;
-  --red:      #FF3B30;
-  --red-l:    #FFF0EF;
-  --orange:   #FF9500;
-  --orange-l: #FFF5E6;
-  --purple:   #AF52DE;
-  --purple-l: #F5EEFF;
-  --shadow:   0 1px 3px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.05);
-  --shadow-lg:0 4px 16px rgba(0,0,0,0.12);
-}
-* { -webkit-tap-highlight-color: transparent; box-sizing: border-box; margin:0; padding:0; }
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
-  min-height: 100vh;
-  max-width: 540px;
-  margin: 0 auto;
-  overscroll-behavior: none;
-}
-/* ─ CARDS ─ */
-.card {
-  background: var(--card);
-  border-radius: 16px;
-  box-shadow: var(--shadow);
-  overflow: hidden;
-}
-.card-section {
-  background: var(--card);
-  border-radius: 16px;
-  box-shadow: var(--shadow);
-  padding: 14px 16px;
-}
-/* ─ TIPO CHIP ─ */
-.tipo-chip {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  border-radius: 14px;
-  padding: 12px 8px;
-  border: 2px solid var(--border);
-  background: var(--card);
-  color: var(--text2);
-  font-size: 0.8rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all .15s;
-  user-select: none;
-  min-height: 70px;
-}
-.tipo-chip .icon { font-size: 1.6rem; line-height: 1; }
-.tipo-chip.active-D { border-color: #FF9500; background: var(--orange-l); color: #CC7700; }
-.tipo-chip.active-C { border-color: var(--blue); background: var(--blue-l); color: #005CC5; }
-.tipo-chip.active-S { border-color: var(--purple); background: var(--purple-l); color: #8A3DB2; }
-.tipo-chip.active-A { border-color: var(--green); background: var(--green-l); color: #25A244; }
-/* ─ MONEY BUTTONS ─ */
-.monto-display {
-  font-size: 2.8rem;
-  font-weight: 800;
-  letter-spacing: -1px;
-  color: var(--text);
-  text-align: center;
-  padding: 12px 0 8px;
-}
-.monto-sub {
-  font-size: 0.78rem;
-  color: var(--text2);
-  text-align: center;
-  min-height: 18px;
-}
-.btn-80 {
-  width: 100%;
-  padding: 18px;
-  border-radius: 14px;
-  background: var(--blue);
-  color: #fff;
-  font-size: 1.3rem;
-  font-weight: 800;
-  border: none;
-  box-shadow: 0 4px 14px rgba(0,122,255,0.35);
-  transition: all .12s;
-  cursor: pointer;
-}
-.btn-80:active { transform: scale(.97); box-shadow: none; }
-.btn-q {
-  flex: 1;
-  padding: 14px 4px;
-  border-radius: 12px;
-  border: none;
-  font-size: 0.9rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all .1s;
-  user-select: none;
-}
-.btn-q:active { transform: scale(.93); }
-.btn-q-add { background: #E8F2FF; color: var(--blue); }
-.btn-q-sub { background: var(--red-l); color: var(--red); }
-/* ─ WORKER ROW ─ */
-.worker-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 13px 16px;
-  border-bottom: 1px solid var(--border);
-  cursor: pointer;
-  transition: background .1s;
-}
-.worker-row:last-child { border-bottom: none; }
-.worker-row:active { background: var(--bg); }
-/* ─ LOG ROW ─ */
-.log-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 11px 14px;
-  border-bottom: 1px solid var(--border);
-}
-.log-row:last-child { border-bottom: none; }
-/* ─ BADGE ─ */
-.badge {
-  border-radius: 8px;
-  padding: 3px 9px;
-  font-size: 0.72rem;
-  font-weight: 700;
-  white-space: nowrap;
-}
-.badge-D { background: var(--orange-l); color: #CC7700; }
-.badge-C { background: var(--blue-l);   color: #005CC5; }
-.badge-S { background: var(--purple-l); color: #8A3DB2; }
-.badge-A { background: var(--green-l);  color: #1E8B3A; }
-/* ─ INPUTS ─ */
-input[type=text], input[type=url], select {
-  width: 100%;
-  padding: 12px 14px;
-  border-radius: 12px;
-  border: 1.5px solid var(--border);
-  background: var(--card);
-  color: var(--text);
-  font-size: 1rem;
-  font-family: inherit;
-  outline: none;
-  appearance: none;
-}
-input:focus, select:focus { border-color: var(--blue); }
-select {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236D6D72' fill='none' stroke-width='1.5'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 14px center;
-  padding-right: 36px;
-}
-/* ─ TABS ─ */
-.tab-bar {
-  display: flex;
-  background: var(--card);
-  border-top: 1px solid var(--border);
-  position: fixed;
-  bottom: 0; left: 50%; transform: translateX(-50%);
-  width: 100%; max-width: 540px;
-  z-index: 50;
-  padding-bottom: env(safe-area-inset-bottom, 0);
-}
-.tab-btn {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 8px 4px 6px;
-  gap: 2px;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  transition: opacity .12s;
-}
-.tab-btn .ti { font-size: 1.4rem; }
-.tab-btn .tl { font-size: 0.65rem; font-weight: 600; color: var(--text3); }
-.tab-btn.active .tl { color: var(--blue); }
-.tab-btn.active .ti { filter: none; }
-/* ─ SECTION LABEL ─ */
-.sec-label {
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: var(--text2);
-  text-transform: uppercase;
-  letter-spacing: .06em;
-  padding: 0 4px;
-  margin-bottom: 6px;
-}
-/* ─ BIG BUTTON ─ */
-.btn-primary {
-  width: 100%;
-  padding: 17px;
-  border-radius: 14px;
-  border: none;
-  background: var(--blue);
-  color: #fff;
-  font-size: 1.05rem;
-  font-weight: 700;
-  box-shadow: 0 4px 14px rgba(0,122,255,0.3);
-  cursor: pointer;
-  transition: all .12s;
-}
-.btn-primary:active { transform: scale(.97); }
-.btn-primary.green { background: var(--green); box-shadow: 0 4px 14px rgba(52,199,89,0.3); }
-.btn-primary.red   { background: var(--red);   box-shadow: 0 4px 14px rgba(255,59,48,0.3); }
-.btn-primary.gray  { background: #8E8E93; box-shadow: none; }
-/* ─ RESUMEN CARD ─ */
-.res-card {
-  background: var(--card);
-  border-radius: 16px;
-  box-shadow: var(--shadow);
-  overflow: hidden;
-}
-.res-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding: 14px 16px 10px;
-  border-bottom: 1px solid var(--border);
-}
-.res-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  border-bottom: 1px solid var(--border);
-}
-.res-cell {
-  padding: 10px 6px;
-  text-align: center;
-  border-right: 1px solid var(--border);
-}
-.res-cell:last-child { border-right: none; }
-.res-cell .label { font-size: 0.65rem; color: var(--text2); font-weight: 600; }
-.res-cell .val   { font-size: 0.95rem; font-weight: 800; color: var(--text); margin-top: 2px; }
-/* ─ TOAST ─ */
-#toast {
-  position: fixed;
-  bottom: 80px; left: 50%; transform: translateX(-50%) translateY(0);
-  background: rgba(28,28,30,0.92);
-  color: #fff;
-  padding: 11px 24px;
-  border-radius: 999px;
-  font-size: 0.92rem;
-  font-weight: 600;
-  z-index: 9999;
-  white-space: nowrap;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity .2s, transform .2s;
-  backdrop-filter: blur(10px);
-}
-#toast.show { opacity: 1; }
-/* ─ MODAL ─ */
-#modal-overlay {
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,0.45);
-  z-index: 200;
-  display: flex; align-items: flex-end;
-  backdrop-filter: blur(2px);
-}
-#modal-box {
-  background: var(--card);
-  border-radius: 22px 22px 0 0;
-  padding: 8px 0 0;
-  width: 100%;
-  max-height: 88vh;
-  overflow-y: auto;
-  padding-bottom: env(safe-area-inset-bottom, 16px);
-}
-.modal-handle {
-  width: 36px; height: 4px;
-  background: var(--border);
-  border-radius: 2px;
-  margin: 0 auto 16px;
-}
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 20px 14px;
-  border-bottom: 1px solid var(--border);
-}
-.modal-title { font-size: 1.1rem; font-weight: 700; }
-.modal-close {
-  width: 30px; height: 30px;
-  border-radius: 50%;
-  background: var(--bg);
-  border: none;
-  font-size: 1rem;
-  color: var(--text2);
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-}
-.modal-body { padding: 16px 20px 20px; }
-/* ─ STATUS ─ */
-.status-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
-/* ─ SCROLLBAR ─ */
-::-webkit-scrollbar { width: 3px; }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-/* ─ SELECTED WORKER ─ */
-.sel-worker-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: var(--blue-l);
-  border: 1.5px solid #B8D8FF;
-  border-radius: 14px;
-  padding: 12px 14px;
-}
-/* ─ KPI BOX ─ */
-.kpi-box {
-  background: var(--card);
-  border-radius: 16px;
-  padding: 14px;
-  text-align: center;
-  box-shadow: var(--shadow);
-}
-.kpi-val { font-size: 1.5rem; font-weight: 800; }
-.kpi-lbl { font-size: 0.7rem; color: var(--text2); font-weight: 600; margin-top: 2px; }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0f172a" />
+  <title>Control de Comidas - Obra</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- SheetJS (XLSX) CDN para exportar Excel sin internet -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <style>
+    * { -webkit-tap-highlight-color: transparent; user-select: none; }
+    input, select { user-select: text; }
+    .btn-active:active { transform: scale(0.96); }
+  </style>
 </head>
+<body class="bg-slate-900 text-slate-100 min-h-screen pb-24 font-sans">
 
-<body>
-
-<!-- ══ STATUS BAR ══ -->
-<div style="background:var(--card);border-bottom:1px solid var(--border);padding:8px 16px;display:flex;justify-content:space-between;align-items:center;">
-  <div style="display:flex;align-items:center;gap:6px;">
-    <span class="status-dot" id="dot-status" style="background:var(--green);"></span>
-    <span style="font-size:.78rem;color:var(--text2);font-weight:600;" id="lbl-status">En línea</span>
-  </div>
-  <div style="display:flex;align-items:center;gap:8px;">
-    <span id="lbl-pending" style="font-size:.75rem;color:var(--orange);font-weight:700;display:none;">⬆ <span id="cnt-pending">0</span> pendientes</span>
-    <button id="btn-sync" onclick="syncNow()" style="display:none;background:var(--blue);color:#fff;border:none;border-radius:20px;padding:4px 12px;font-size:.75rem;font-weight:700;cursor:pointer;">Sincronizar</button>
-  </div>
-  <span style="font-size:.75rem;color:var(--text3);" id="lbl-date"></span>
-</div>
-
-<!-- ══ HEADER ══ -->
-<div style="padding:14px 16px 10px;background:var(--card);border-bottom:1px solid var(--border);">
-  <div style="font-size:1.25rem;font-weight:800;color:var(--text);">🏗️ Obra Comidas</div>
-  <div style="font-size:.78rem;color:var(--text2);margin-top:1px;" id="lbl-week"></div>
-</div>
-
-<!-- ══════════ VISTAS ══════════ -->
-
-<!-- ── REGISTRO ── -->
-<div id="view-reg" class="view" style="padding:14px 14px 100px;display:flex;flex-direction:column;gap:12px;">
-
-  <!-- Tipo (multi-selección) -->
-  <div>
-    <p class="sec-label">¿Qué vas a registrar?</p>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
-      <div class="tipo-chip" id="chip-D" onclick="toggleTipo('D')">
-        <span class="icon">🍳</span><span>Desayuno</span>
+  <!-- HEADER: ESTADO CONEXIÓN, RELOJ TIJUANA Y SINCRONIZACIÓN -->
+  <header class="sticky top-0 z-30 bg-slate-950/95 backdrop-blur border-b border-slate-800 px-3 py-2.5 shadow-lg">
+    <div class="max-w-5xl mx-auto flex flex-wrap items-center justify-between gap-2">
+      <div class="flex items-center gap-2">
+        <span id="statusBadge" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+          <span id="statusDot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span id="statusText">En línea</span>
+        </span>
+        <div class="text-xs text-slate-400">
+          <span id="relojTijuana" class="font-mono font-semibold text-slate-200">Cargando hora TJ...</span>
+        </div>
       </div>
-      <div class="tipo-chip" id="chip-C" onclick="toggleTipo('C')">
-        <span class="icon">🍽️</span><span>Comida</span>
-      </div>
-      <div class="tipo-chip" id="chip-S" onclick="toggleTipo('S')">
-        <span class="icon">🥤</span><span>Soda</span>
-      </div>
-      <div class="tipo-chip" id="chip-A" onclick="toggleTipo('A')">
-        <span class="icon">💵</span><span>Abono</span>
+
+      <div class="flex items-center gap-2">
+        <button onclick="sincronizarConSheets()" id="btnSync" class="btn-active flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow">
+          <span id="syncIcon">🔄</span>
+          <span>Sincronizar</span>
+          <span id="badgePendientes" class="bg-amber-400 text-slate-950 px-1.5 py-0.2 rounded-full text-xs font-extrabold">0</span>
+        </button>
+        <button onclick="abrirModalConfig()" class="btn-active bg-slate-800 hover:bg-slate-700 text-slate-300 p-1.5 rounded-lg border border-slate-700" title="Configurar Google Sheets">
+          ⚙️
+        </button>
       </div>
     </div>
-    <p id="tipo-hint" style="font-size:.75rem;color:var(--blue);margin-top:6px;text-align:center;min-height:16px;"></p>
-  </div>
+  </header>
 
-  <!-- Cuadrilla + Buscar -->
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-    <div>
-      <p class="sec-label">Cuadrilla</p>
-      <select id="sel-cuadrilla" onchange="filterWorkers()">
-        <option value="">Todas</option>
-      </select>
-    </div>
-    <div>
-      <p class="sec-label">Buscar</p>
-      <input id="inp-search" type="text" placeholder="Nombre…" oninput="filterWorkers()"/>
+  <!-- NAVEGACIÓN PRINCIPAL (2 PESTAÑAS) -->
+  <div class="max-w-5xl mx-auto px-3 pt-3">
+    <div class="grid grid-cols-2 gap-2 bg-slate-800 p-1 rounded-xl border border-slate-700">
+      <button id="tabBtnRegistro" onclick="cambiarVista('registro')" class="py-2.5 rounded-lg font-extrabold text-sm transition-all bg-amber-500 text-slate-950 shadow">
+        ⚡ 1. Registro Rápido
+      </button>
+      <button id="tabBtnResumen" onclick="cambiarVista('resumen')" class="py-2.5 rounded-lg font-extrabold text-sm transition-all text-slate-300 hover:text-white">
+        📊 2. Resumen y Cobros
+      </button>
     </div>
   </div>
 
-  <!-- Trabajador -->
-  <div>
-    <p class="sec-label">Trabajador</p>
-    <div id="worker-selected" style="display:none;">
-      <div class="sel-worker-bar">
+  <!-- ==========================================
+       VISTA 1: REGISTRO ULTRA RÁPIDO
+       ========================================== -->
+  <main id="vistaRegistro" class="max-w-5xl mx-auto px-3 pt-3 space-y-4">
+
+    <!-- PASO 1: CUADRILLA Y TRABAJADOR -->
+    <section class="bg-slate-800/90 border border-slate-700 rounded-2xl p-3.5 shadow">
+      <div class="flex items-center justify-between mb-2">
+        <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400">1. Selecciona Cuadrilla y Trabajador</h2>
+        <button onclick="abrirModalTrabajador()" class="btn-active text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-2.5 py-1 rounded-lg">
+          + Nuevo Trabajador
+        </button>
+      </div>
+
+      <!-- Chips de Cuadrillas -->
+      <div id="contenedorCuadrillas" class="flex gap-1.5 overflow-x-auto pb-2 mb-2.5 no-scrollbar"></div>
+
+      <!-- Buscador rápido -->
+      <div class="relative mb-2.5">
+        <input id="inputBuscarTrabajador" type="text" oninput="renderListaTrabajadores()" placeholder="🔍 Buscar por nombre o apodo..." class="w-full bg-slate-900 border border-slate-700 focus:border-amber-400 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 outline-none" />
+        <button onclick="limpiarBusquedaTrabajador()" class="absolute right-3 top-2.5 text-slate-400 hover:text-white text-sm">✕</button>
+      </div>
+
+      <!-- Grid de botones de trabajadores -->
+      <div id="gridTrabajadores" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 max-h-48 overflow-y-auto pr-1"></div>
+
+      <!-- Indicador del Trabajador Seleccionado -->
+      <div id="bannerTrabajadorSeleccionado" class="mt-3 hidden bg-slate-900 border border-amber-500/40 rounded-xl p-2.5 flex items-center justify-between">
         <div>
-          <div style="font-weight:700;color:var(--text);" id="lbl-wname"></div>
-          <div style="font-size:.78rem;color:var(--text2);margin-top:1px;" id="lbl-wsquad"></div>
+          <span class="text-xs text-slate-400 block">Registrando a:</span>
+          <span id="lblTrabajadorActivo" class="text-base font-extrabold text-amber-400">—</span>
+          <span id="lblCuadrillaActiva" class="text-xs bg-slate-800 text-slate-300 px-2 py-0.5 rounded ml-1">—</span>
         </div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span id="lbl-deuda-worker" style="font-size:.8rem;font-weight:700;color:var(--orange);display:none;"></span>
-          <button onclick="clearWorker()" style="background:var(--bg);border:none;border-radius:50%;width:28px;height:28px;font-size:1rem;cursor:pointer;color:var(--text2);">✕</button>
+        <div class="text-right">
+          <span class="text-xs text-slate-400 block">Deuda Actual:</span>
+          <span id="lblDeudaActiva" class="text-base font-black text-rose-400">$0</span>
         </div>
       </div>
+    </section>
+
+    <!-- PASO 2: TIPO DE MOVIMIENTO -->
+    <section class="bg-slate-800/90 border border-slate-700 rounded-2xl p-3.5 shadow">
+      <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">2. Tipo de Movimiento</h2>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        <button onclick="seleccionarTipo('Desayuno')" id="btnTipo-Desayuno" class="btn-active py-3 px-2 rounded-xl font-extrabold text-sm border-2 flex flex-col items-center gap-1 bg-amber-500/20 border-amber-400 text-amber-300">
+          <span class="text-xl">🍳</span>
+          <span>Desayuno</span>
+        </button>
+        <button onclick="seleccionarTipo('Comida')" id="btnTipo-Comida" class="btn-active py-3 px-2 rounded-xl font-extrabold text-sm border-2 flex flex-col items-center gap-1 bg-slate-900 border-slate-700 text-slate-400">
+          <span class="text-xl">🍲</span>
+          <span>Comida</span>
+        </button>
+        <button onclick="seleccionarTipo('Soda')" id="btnTipo-Soda" class="btn-active py-3 px-2 rounded-xl font-extrabold text-sm border-2 flex flex-col items-center gap-1 bg-slate-900 border-slate-700 text-slate-400">
+          <span class="text-xl">🥤</span>
+          <span>Soda / Extra</span>
+        </button>
+        <button onclick="seleccionarTipo('Abono')" id="btnTipo-Abono" class="btn-active py-3 px-2 rounded-xl font-extrabold text-sm border-2 flex flex-col items-center gap-1 bg-slate-900 border-slate-700 text-slate-400">
+          <span class="text-xl">💵</span>
+          <span>Abono / Pago</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- PASO 3: BOTONERA CERO TECLADO -->
+    <section class="bg-slate-800/90 border border-slate-700 rounded-2xl p-3.5 shadow">
+      <div class="flex items-center justify-between mb-2">
+        <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400">3. Monto (Toca para sumar)</h2>
+        <button onclick="limpiarMonto()" class="btn-active bg-rose-600/20 hover:bg-rose-600/30 border border-rose-500/40 text-rose-300 text-xs font-bold px-3 py-1 rounded-lg">
+          🗑️ Limpiar ($0)
+        </button>
+      </div>
+
+      <!-- Totalizador Pantalla -->
+      <div class="bg-slate-950 border border-slate-700 rounded-2xl p-3 mb-3 flex items-center justify-between">
+        <div>
+          <span id="lblTipoEnTotalizador" class="text-xs font-bold uppercase px-2 py-0.5 rounded bg-amber-500/20 text-amber-300">Desayuno</span>
+          <p id="lblHistorialSuma" class="text-xs text-slate-400 mt-1 font-mono">Toque los billetes/monedas...</p>
+        </div>
+        <div id="displayMonto" class="text-4xl font-black text-emerald-400 font-mono tracking-tight">$0</div>
+      </div>
+
+      <!-- Botón Gigante $80 + Botones Rápidos -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+        <!-- Botón Estándar $80 -->
+        <button onclick="sumarMonto(80)" class="btn-active sm:col-span-1 bg-gradient-to-br from-amber-400 to-amber-600 text-slate-950 rounded-2xl py-5 px-4 flex flex-col items-center justify-center shadow-lg border-2 border-amber-300">
+          <span class="text-xs font-black uppercase tracking-wider opacity-80">Costo Estándar</span>
+          <span class="text-4xl font-black tracking-tight">+$80</span>
+        </button>
+
+        <!-- Botones Secundarios -->
+        <div class="sm:col-span-2 grid grid-cols-3 gap-2">
+          <button onclick="sumarMonto(1)" class="btn-active bg-slate-900 hover:bg-slate-700 border border-slate-600 rounded-xl py-3 text-lg font-extrabold text-white">+$1</button>
+          <button onclick="sumarMonto(5)" class="btn-active bg-slate-900 hover:bg-slate-700 border border-slate-600 rounded-xl py-3 text-lg font-extrabold text-white">+$5</button>
+          <button onclick="sumarMonto(10)" class="btn-active bg-slate-900 hover:bg-slate-700 border border-slate-600 rounded-xl py-3 text-lg font-extrabold text-white">+$10</button>
+          <button onclick="sumarMonto(20)" class="btn-active bg-slate-900 hover:bg-slate-700 border border-slate-600 rounded-xl py-3 text-lg font-extrabold text-cyan-300">+$20</button>
+          <button onclick="sumarMonto(50)" class="btn-active bg-slate-900 hover:bg-slate-700 border border-slate-600 rounded-xl py-3 text-lg font-extrabold text-emerald-300">+$50</button>
+          <button onclick="sumarMonto(100)" class="btn-active bg-slate-900 hover:bg-slate-700 border border-slate-600 rounded-xl py-3 text-lg font-extrabold text-emerald-400">+$100</button>
+          <button onclick="sumarMonto(500)" class="btn-active col-span-3 bg-slate-900 hover:bg-slate-700 border border-slate-600 rounded-xl py-2.5 text-lg font-extrabold text-amber-300">+$500</button>
+        </div>
+      </div>
+
+      <!-- Botón Registrar -->
+      <button onclick="registrarMovimiento()" class="btn-active mt-4 w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-lg py-4 rounded-2xl shadow-lg tracking-wide uppercase">
+        ✅ Registrar Movimiento
+      </button>
+    </section>
+
+    <!-- ÚLTIMOS MOVIMIENTOS DE HOY (PARA DESHACER ERRORES DE DEDO) -->
+    <section class="bg-slate-800/60 border border-slate-800 rounded-2xl p-3.5">
+      <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Últimos movimientos registrados hoy</h3>
+      <div id="listaUltimosMovimientos" class="space-y-1.5 text-xs"></div>
+    </section>
+  </main>
+
+  <!-- ==========================================
+       VISTA 2: RESUMEN SEMANAL Y COBROS
+       ========================================== -->
+  <main id="vistaResumen" class="hidden max-w-5xl mx-auto px-3 pt-3 space-y-4">
+    <!-- Tarjetas de Totales Globales -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+      <div class="bg-slate-800 border border-slate-700 p-3 rounded-xl">
+        <span class="text-xs text-slate-400 block">Saldos Anteriores</span>
+        <span id="kpiSaldoAnt" class="text-xl font-black text-slate-200">$0</span>
+      </div>
+      <div class="bg-slate-800 border border-slate-700 p-3 rounded-xl">
+        <span class="text-xs text-slate-400 block">Consumo Semana</span>
+        <span id="kpiConsumoSem" class="text-xl font-black text-amber-400">$0</span>
+      </div>
+      <div class="bg-slate-800 border border-slate-700 p-3 rounded-xl">
+        <span class="text-xs text-slate-400 block">Total Abonado</span>
+        <span id="kpiAbonado" class="text-xl font-black text-emerald-400">$0</span>
+      </div>
+      <div class="bg-slate-800 border border-slate-700 p-3 rounded-xl">
+        <span class="text-xs text-slate-400 block">Por Cobrar (Calle)</span>
+        <span id="kpiPorCobrar" class="text-xl font-black text-rose-400">$0</span>
+      </div>
     </div>
-    <div id="worker-list" class="card" style="max-height:200px;overflow-y:auto;display:none;">
-      <p style="padding:14px;text-align:center;color:var(--text3);font-size:.9rem;">Sin resultados</p>
+
+    <!-- Barra de Herramientas y Exportación Excel -->
+    <div class="bg-slate-800 border border-slate-700 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-2">
+      <div class="flex items-center gap-2">
+        <select id="filtroResumenCuadrilla" onchange="renderTablaResumen()" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-white">
+          <option value="TODAS">Todas las cuadrillas</option>
+        </select>
+        <input id="filtroResumenNombre" oninput="renderTablaResumen()" type="text" placeholder="Buscar trabajador..." class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white" />
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2">
+        <button onclick="exportarExcelLocal()" class="btn-active bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold px-3.5 py-2.5 rounded-xl shadow flex items-center gap-1.5">
+          📥 Descargar Control_Semanal_Comidas.xlsx
+        </button>
+        <button onclick="cerrarSemanaArrastrarSaldos()" class="btn-active bg-rose-600/20 hover:bg-rose-600/40 border border-rose-500/40 text-rose-300 text-xs font-bold px-3 py-2.5 rounded-xl">
+          🔒 Corte de Semana (Arrastrar Saldos)
+        </button>
+      </div>
     </div>
-    <button onclick="showWorkerList()" id="btn-show-list" style="width:100%;padding:13px;border-radius:14px;border:1.5px dashed var(--border);background:transparent;color:var(--blue);font-weight:700;font-size:.95rem;cursor:pointer;margin-top:4px;">
-      + Seleccionar trabajador
-    </button>
-  </div>
 
-  <!-- Monto -->
-  <div class="card-section">
-    <div class="monto-display" id="lbl-monto">$0</div>
-    <div class="monto-sub" id="monto-sub"></div>
-    <div style="display:flex;gap:8px;margin:8px 0 10px;">
-      <button onclick="clearMonto()" style="flex:1;padding:10px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg);color:var(--text2);font-weight:600;cursor:pointer;">Limpiar</button>
-      <button onclick="setMonto(80)" style="flex:2;padding:10px;border-radius:10px;border:1.5px solid var(--blue);background:var(--blue-l);color:var(--blue);font-weight:700;cursor:pointer;">Poner $80</button>
+    <!-- Tabla de Resumen Semanal -->
+    <div class="bg-slate-800 border border-slate-700 rounded-2xl overflow-hidden shadow">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse text-xs">
+          <thead>
+            <tr class="bg-slate-950 text-slate-400 border-b border-slate-700 uppercase">
+              <th class="p-2.5">Trabajador</th>
+              <th class="p-2.5 text-right">Saldo Ant.</th>
+              <th class="p-2.5 text-center">Lun</th>
+              <th class="p-2.5 text-center">Mar</th>
+              <th class="p-2.5 text-center">Mié</th>
+              <th class="p-2.5 text-center">Jue</th>
+              <th class="p-2.5 text-center">Vie</th>
+              <th class="p-2.5 text-center">Sáb</th>
+              <th class="p-2.5 text-right">Semanal</th>
+              <th class="p-2.5 text-right text-emerald-400">Abonado</th>
+              <th class="p-2.5 text-right">Saldo Actual</th>
+              <th class="p-2.5 text-center">Acción</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyResumen" class="divide-y divide-slate-700/60"></tbody>
+        </table>
+      </div>
     </div>
-    <button class="btn-80" onclick="addMonto(80)">+ $80</button>
-    <div style="display:flex;gap:6px;margin-top:8px;">
-      <button class="btn-q btn-q-add" onclick="addMonto(1)">+$1</button>
-      <button class="btn-q btn-q-add" onclick="addMonto(5)">+$5</button>
-      <button class="btn-q btn-q-add" onclick="addMonto(10)">+$10</button>
-      <button class="btn-q btn-q-add" onclick="addMonto(50)">+$50</button>
-      <button class="btn-q btn-q-add" onclick="addMonto(100)">+$100</button>
-    </div>
-    <div style="display:flex;gap:6px;margin-top:6px;">
-      <button class="btn-q btn-q-sub" onclick="subMonto(1)">-$1</button>
-      <button class="btn-q btn-q-sub" onclick="subMonto(5)">-$5</button>
-      <button class="btn-q btn-q-sub" onclick="subMonto(10)">-$10</button>
-      <button class="btn-q btn-q-sub" onclick="subMonto(50)">-$50</button>
-      <button class="btn-q btn-q-sub" onclick="subMonto(100)">-$100</button>
-    </div>
-  </div>
+  </main>
 
-  <!-- Nota -->
-  <div>
-    <p class="sec-label">Nota (opcional)</p>
-    <input id="inp-nota" type="text" placeholder="Ej: sin frijoles, soda extra…"/>
-  </div>
-
-  <!-- REGISTRAR -->
-  <button class="btn-primary" onclick="registrar()">✅ Registrar movimiento</button>
-
-  <!-- Log hoy -->
-  <div>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-      <p class="sec-label">Registros de hoy</p>
-      <span style="font-size:.75rem;color:var(--text3);" id="cnt-hoy"></span>
-    </div>
-    <div class="card" id="log-hoy">
-      <p style="padding:16px;text-align:center;color:var(--text3);font-size:.88rem;">Sin movimientos hoy</p>
-    </div>
-  </div>
-</div>
-
-<!-- ── RESUMEN ── -->
-<div id="view-res" class="view" style="padding:14px 14px 100px;display:none;flex-direction:column;gap:12px;">
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-    <button onclick="buildResumen()" style="padding:13px;border-radius:14px;border:1.5px solid var(--border);background:var(--card);color:var(--blue);font-weight:700;font-size:.9rem;cursor:pointer;">🔄 Actualizar</button>
-    <button onclick="downloadExcel()" class="btn-primary green" style="padding:13px;font-size:.9rem;">📥 Descargar Excel</button>
-  </div>
-
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-    <div>
-      <p class="sec-label">Cuadrilla</p>
-      <select id="sel-res-cuad" onchange="buildResumen()"><option value="">Todas</option></select>
-    </div>
-    <div>
-      <p class="sec-label">Semana</p>
-      <select id="sel-semana" onchange="buildResumen()"><option value="current">Semana actual</option></select>
-    </div>
-  </div>
-
-  <!-- KPIs -->
-  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
-    <div class="kpi-box">
-      <div class="kpi-val" id="kpi-cons">$0</div>
-      <div class="kpi-lbl">Consumido</div>
-    </div>
-    <div class="kpi-box">
-      <div class="kpi-val" style="color:var(--green);" id="kpi-abon">$0</div>
-      <div class="kpi-lbl">Abonado</div>
-    </div>
-    <div class="kpi-box">
-      <div class="kpi-val" style="color:var(--red);" id="kpi-deuda">$0</div>
-      <div class="kpi-lbl">Por cobrar</div>
-    </div>
-  </div>
-
-  <!-- Tabla -->
-  <div id="tabla-res" style="display:flex;flex-direction:column;gap:8px;">
-    <p style="text-align:center;color:var(--text3);font-size:.9rem;padding:24px;">Presiona Actualizar ↑</p>
-  </div>
-</div>
-
-<!-- ── CONFIG ── -->
-<div id="view-cfg" class="view" style="padding:14px 14px 100px;display:none;flex-direction:column;gap:12px;">
-
-  <!-- Cuadrillas -->
-  <div class="card-section">
-    <p style="font-weight:700;font-size:1rem;margin-bottom:10px;">Cuadrillas</p>
-    <div id="list-cuad" style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px;"></div>
-    <div style="display:flex;gap:8px;">
-      <input id="inp-new-cuad" type="text" placeholder="Nueva cuadrilla…" style="flex:1;"/>
-      <button onclick="addCuadrilla()" style="padding:12px 16px;border-radius:12px;background:var(--blue);color:#fff;border:none;font-weight:700;cursor:pointer;">+</button>
-    </div>
-  </div>
-
-  <!-- Trabajadores -->
-  <div class="card-section">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-      <p style="font-weight:700;font-size:1rem;">Trabajadores</p>
-      <span style="font-size:.8rem;color:var(--text2);" id="cnt-w">0 registrados</span>
-    </div>
-    <input id="inp-cfg-search" type="text" placeholder="Buscar…" oninput="renderWorkersCfg()" style="margin-bottom:10px;"/>
-    <div id="list-workers-cfg" style="max-height:260px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;margin-bottom:10px;"></div>
-    <button class="btn-primary" onclick="openAddWorker()">➕ Nuevo trabajador</button>
-  </div>
-
-  <!-- Sync desde Sheets -->
-  <div class="card-section">
-    <p style="font-weight:700;font-size:1rem;margin-bottom:6px;">Sincronizar desde Sheets</p>
-    <p style="font-size:.8rem;color:var(--text2);margin-bottom:10px;">Si borraste filas en el Excel, jala el estado actualizado.</p>
-    <button class="btn-primary" onclick="pullFromSheets()" style="background:var(--purple);">⬇ Importar desde Google Sheets</button>
-  </div>
-
-  <!-- Webhook -->
-  <div class="card-section">
-    <p style="font-weight:700;font-size:1rem;margin-bottom:6px;">Google Sheets Webhook</p>
-    <input id="inp-webhook" type="url" placeholder="https://script.google.com/macros/s/…/exec" style="margin-bottom:8px;"/>
-    <button class="btn-primary" onclick="saveWebhook()">Guardar URL</button>
-  </div>
-
-  <!-- Backup -->
-  <div class="card-section">
-    <p style="font-weight:700;font-size:1rem;margin-bottom:10px;">Respaldo</p>
-    <div style="display:flex;flex-direction:column;gap:8px;">
-      <button onclick="exportBackup()" style="padding:13px;border-radius:12px;border:1.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:600;cursor:pointer;">📦 Exportar backup JSON</button>
-      <button onclick="document.getElementById('file-import').click()" style="padding:13px;border-radius:12px;border:1.5px solid var(--border);background:var(--bg);color:var(--text);font-weight:600;cursor:pointer;">📂 Importar backup JSON</button>
-      <button onclick="limpiarSemana()" style="padding:13px;border-radius:12px;border:1.5px solid var(--red);background:var(--red-l);color:var(--red);font-weight:700;cursor:pointer;">🗑️ Limpiar datos de semana anterior</button>
-    </div>
-  </div>
-</div>
-
-<!-- ══ TAB BAR ══ -->
-<nav class="tab-bar">
-  <button class="tab-btn active" id="tab-reg" onclick="switchView('reg')">
-    <span class="ti">📝</span>
-    <span class="tl" style="color:var(--blue);">Registro</span>
-  </button>
-  <button class="tab-btn" id="tab-res" onclick="switchView('res')">
-    <span class="ti">📊</span>
-    <span class="tl">Resumen</span>
-  </button>
-  <button class="tab-btn" id="tab-cfg" onclick="switchView('cfg')">
-    <span class="ti">⚙️</span>
-    <span class="tl">Config</span>
-  </button>
-</nav>
-
-<!-- ══ MODAL ══ -->
-<div id="modal-overlay" style="display:none;" onclick="handleOverlayClick(event)">
-  <div id="modal-box">
-    <div class="modal-handle"></div>
-    <div class="modal-header">
-      <span class="modal-title" id="modal-title">Modal</span>
-      <button class="modal-close" id="modal-close-btn" onclick="closeModal()">✕</button>
-    </div>
-    <div class="modal-body" id="modal-body"></div>
-  </div>
-</div>
-
-<!-- ══ TOAST ══ -->
-<div id="toast"></div>
-<input type="file" id="file-import" accept=".json" style="display:none;" onchange="importBackup(event)"/>
-
-<script>
-// ════════════════════════════════
-// ZONA HORARIA
-// ════════════════════════════════
-const TZ = 'America/Tijuana';
-function tzNow() {
-  const now = new Date();
-  const fmt = (opts) => new Intl.DateTimeFormat('en-CA', { timeZone: TZ, ...opts }).format(now);
-  const date = fmt({ year:'numeric', month:'2-digit', day:'2-digit' });
-  const time = fmt({ hour:'2-digit', minute:'2-digit', hour12: false });
-  const dayName = new Intl.DateTimeFormat('es', { timeZone: TZ, weekday: 'long' })
-    .format(now).replace(/^\w/, c => c.toUpperCase());
-  return { date, time, dayName, ts: now.getTime() };
-}
-function getWeekBounds() {
-  const now  = new Date();
-  const date = new Intl.DateTimeFormat('en-CA', { timeZone: TZ }).format(now);
-  const d    = new Date(date + 'T12:00:00');
-  const dow  = d.getDay();
-  const diff = dow === 0 ? -6 : 1 - dow;
-  const mon  = new Date(d); mon.setDate(d.getDate() + diff);
-  const sat  = new Date(mon); sat.setDate(mon.getDate() + 5);
-  const iso  = x => x.toISOString().split('T')[0];
-  const lbl  = x => x.toLocaleDateString('es', { timeZone: TZ, day:'2-digit', month:'short' });
-  return { start: iso(mon), end: iso(sat), label: `${lbl(mon)} – ${lbl(sat)}` };
-}
-
-// ════════════════════════════════
-// INDEXEDDB
-// ════════════════════════════════
-let db;
-function openDB() {
-  return new Promise((res, rej) => {
-    const req = indexedDB.open('ObraComidas', 3);
-    req.onupgradeneeded = e => {
-      const d = e.target.result;
-      if (!d.objectStoreNames.contains('movimientos')) {
-        const s = d.createObjectStore('movimientos', { keyPath:'id', autoIncrement:true });
-        s.createIndex('fecha', 'fecha'); s.createIndex('trabajadorId', 'trabajadorId');
-        s.createIndex('synced', 'synced'); s.createIndex('remoteId', 'remoteId', {unique:false});
-      }
-      if (!d.objectStoreNames.contains('trabajadores')) {
-        d.createObjectStore('trabajadores', { keyPath:'id', autoIncrement:true });
-      }
-      if (!d.objectStoreNames.contains('config')) {
-        d.createObjectStore('config', { keyPath:'key' });
-      }
-    };
-    req.onsuccess = e => { db = e.target.result; res(db); };
-    req.onerror   = e => rej(e);
-  });
-}
-const tx  = (store, mode='readonly') => db.transaction(store, mode).objectStore(store);
-const dbGet    = (s,k) => new Promise((r,j) => { const q=tx(s).get(k); q.onsuccess=e=>r(e.target.result); q.onerror=j; });
-const dbGetAll = (s)   => new Promise((r,j) => { const q=tx(s).getAll(); q.onsuccess=e=>r(e.target.result); q.onerror=j; });
-const dbPut    = (s,v) => new Promise((r,j) => { const q=tx(s,'readwrite').put(v); q.onsuccess=e=>r(e.target.result); q.onerror=j; });
-const dbAdd    = (s,v) => new Promise((r,j) => { const q=tx(s,'readwrite').add(v); q.onsuccess=e=>r(e.target.result); q.onerror=j; });
-const dbDel    = (s,k) => new Promise((r,j) => { const q=tx(s,'readwrite').delete(k); q.onsuccess=r; q.onerror=j; });
-async function dbByIndex(store, idxName, val) {
-  return new Promise((r,j) => {
-    const q = tx(store).index(idxName).getAll(val);
-    q.onsuccess=e=>r(e.target.result); q.onerror=j;
-  });
-}
-
-// ════════════════════════════════
-// ESTADO
-// ════════════════════════════════
-let monto        = 0;
-let tiposActivos = new Set(); // 'D','C','S','A'
-let workerSel    = null;
-let allWorkers   = [];
-let allCuad      = [];
-let showingList  = false;
-
-// ════════════════════════════════
-// INIT
-// ════════════════════════════════
-async function init() {
-  await openDB();
-  await loadConfig();
-  await loadWorkers();
-  updateStatusBar();
-  updateDateLabels();
-  renderLogHoy();
-  updatePendingCount();
-  await loadHistWeeks();
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js').catch(()=>{});
-    navigator.serviceWorker.addEventListener('message', e => {
-      if (e.data?.type === 'SYNC_NOW') syncNow();
-    });
-  }
-  window.addEventListener('online',  () => { updateStatusBar(); updatePendingCount(); });
-  window.addEventListener('offline', updateStatusBar);
-}
-
-function updateDateLabels() {
-  const t  = tzNow();
-  const wb = getWeekBounds();
-  document.getElementById('lbl-date').textContent = t.date;
-  document.getElementById('lbl-week').textContent = `Semana: ${wb.label}`;
-}
-
-async function loadConfig() {
-  const c = await dbGet('config', 'cuadrillas');
-  allCuad = c ? c.value : [];
-  const wh = await dbGet('config', 'webhook');
-  if (wh) document.getElementById('inp-webhook').value = wh.value;
-  renderCuadSelects();
-  renderCuadList();
-}
-
-async function loadWorkers() {
-  allWorkers = await dbGetAll('trabajadores');
-  allWorkers.sort((a,b) => a.nombre.localeCompare(b.nombre));
-  document.getElementById('cnt-w').textContent = `${allWorkers.length} registrados`;
-}
-
-// ════════════════════════════════
-// TABS
-// ════════════════════════════════
-function switchView(v) {
-  ['reg','res','cfg'].forEach(x => {
-    document.getElementById(`view-${x}`).style.display = x===v ? 'flex' : 'none';
-    document.getElementById(`view-${x}`).style.flexDirection = 'column';
-    const tb = document.getElementById(`tab-${x}`);
-    tb.classList.toggle('active', x===v);
-    tb.querySelector('.tl').style.color = x===v ? 'var(--blue)' : 'var(--text3)';
-  });
-  if (v==='res') buildResumen();
-  if (v==='cfg') { renderCuadList(); renderWorkersCfg(); }
-}
-
-// ════════════════════════════════
-// TIPO (multi-select)
-// ════════════════════════════════
-function toggleTipo(t) {
-  // Abono es exclusivo
-  if (t === 'A') {
-    tiposActivos.clear();
-    tiposActivos.add('A');
-  } else {
-    tiposActivos.delete('A');
-    if (tiposActivos.has(t)) tiposActivos.delete(t);
-    else                     tiposActivos.add(t);
-  }
-  renderTipos();
-  updateMontoHint();
-}
-
-function renderTipos() {
-  ['D','C','S','A'].forEach(t => {
-    const el = document.getElementById(`chip-${t}`);
-    el.className = `tipo-chip${tiposActivos.has(t) ? ` active-${t}` : ''}`;
-  });
-}
-
-function updateMontoHint() {
-  const n = tiposActivos.size;
-  const el = document.getElementById('tipo-hint');
-  if (n <= 1 || tiposActivos.has('A')) { el.textContent = ''; return; }
-  const labels = { D:'Desayuno', C:'Comida', S:'Soda' };
-  const lista = [...tiposActivos].map(t => labels[t]).join(' + ');
-  const porTipo = monto > 0 ? ` → $${Math.round(monto/n)} c/u` : '';
-  el.textContent = `${lista}${porTipo} · Se registran ${n} movimientos`;
-}
-
-// ════════════════════════════════
-// MONTO
-// ════════════════════════════════
-function addMonto(v)  { monto = Math.max(0, monto+v);  renderMonto(); }
-function subMonto(v)  { monto = Math.max(0, monto-v);  renderMonto(); }
-function clearMonto() { monto = 0;                      renderMonto(); }
-function setMonto(v)  { monto = v;                      renderMonto(); }
-function renderMonto() {
-  document.getElementById('lbl-monto').textContent = `$${monto}`;
-  updateMontoHint();
-}
-
-// ════════════════════════════════
-// TRABAJADOR
-// ════════════════════════════════
-function showWorkerList() {
-  showingList = true;
-  document.getElementById('worker-list').style.display = 'block';
-  document.getElementById('btn-show-list').style.display = 'none';
-  filterWorkers();
-}
-
-function filterWorkers() {
-  if (!showingList) return;
-  const cuad = document.getElementById('sel-cuadrilla').value;
-  const q    = document.getElementById('inp-search').value.toLowerCase();
-  let list   = allWorkers;
-  if (cuad) list = list.filter(w => w.cuadrilla === cuad);
-  if (q)    list = list.filter(w => w.nombre.toLowerCase().includes(q));
-  const el   = document.getElementById('worker-list');
-  if (!list.length) {
-    el.innerHTML = '<p style="padding:14px;text-align:center;color:var(--text3);font-size:.88rem;">Sin resultados</p>';
-    return;
-  }
-  el.innerHTML = list.map(w => `
-    <div class="worker-row" onclick="selectWorker(${w.id})">
+  <!-- MODAL: NUEVO TRABAJADOR -->
+  <div id="modalTrabajador" class="fixed inset-0 bg-black/75 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-5 space-y-4">
+      <h3 class="text-lg font-black text-white">Alta de Trabajador</h3>
       <div>
-        <div style="font-weight:600;font-size:.95rem;">${w.nombre}</div>
-        <div style="font-size:.75rem;color:var(--text3);">${w.cuadrilla||'Sin cuadrilla'}</div>
+        <label class="text-xs text-slate-400 block mb-1">Nombre o Apodo</label>
+        <input id="nuevoTrabNombre" type="text" placeholder="Ej. Juan Pérez (El Chino)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white" />
       </div>
-      <span style="color:var(--blue);font-size:1.1rem;">›</span>
-    </div>
-  `).join('');
-}
-
-async function selectWorker(id) {
-  workerSel = allWorkers.find(w => w.id===id);
-  if (!workerSel) return;
-  document.getElementById('worker-list').style.display   = 'none';
-  document.getElementById('btn-show-list').style.display = 'none';
-  document.getElementById('worker-selected').style.display = 'block';
-  document.getElementById('lbl-wname').textContent  = workerSel.nombre;
-  document.getElementById('lbl-wsquad').textContent = workerSel.cuadrilla||'Sin cuadrilla';
-  showingList = false;
-
-  // Calcular deuda histórica
-  const movs = await dbGetAll('movimientos');
-  const wb   = getWeekBounds();
-  const prev = movs.filter(m => m.trabajadorId===id);
-  const cons = prev.filter(m=>m.tipo!=='Abono').reduce((s,m)=>s+m.monto,0);
-  const abon = prev.filter(m=>m.tipo==='Abono').reduce((s,m)=>s+m.monto,0);
-  const deuda = cons - abon;
-  const el = document.getElementById('lbl-deuda-worker');
-  if (deuda>0) { el.textContent=`Debe $${deuda}`; el.style.display='inline'; }
-  else         { el.style.display='none'; }
-
-  // Auto-poner $80 si hay tipo seleccionado
-  if (monto===0 && (tiposActivos.has('D')||tiposActivos.has('C'))) setMonto(80);
-}
-
-function clearWorker() {
-  workerSel = null;
-  document.getElementById('worker-selected').style.display = 'none';
-  document.getElementById('btn-show-list').style.display   = 'block';
-  document.getElementById('inp-search').value = '';
-  showingList = false;
-}
-
-// ════════════════════════════════
-// REGISTRAR
-// ════════════════════════════════
-async function registrar() {
-  if (!workerSel)         { showToast('⚠️ Selecciona un trabajador'); return; }
-  if (tiposActivos.size===0){ showToast('⚠️ Selecciona el tipo'); return; }
-  if (monto<=0)            { showToast('⚠️ Ingresa un monto'); return; }
-
-  const t    = tzNow();
-  const nota = document.getElementById('inp-nota').value.trim();
-  const tipos = [...tiposActivos];
-  const montoPorTipo = Math.round(monto / tipos.length);
-
-  const tipoMap = { D:'Desayuno', C:'Comida', S:'Soda', A:'Abono' };
-
-  for (const tipo of tipos) {
-    const mov = {
-      trabajadorId:     workerSel.id,
-      trabajadorNombre: workerSel.nombre,
-      cuadrilla:        workerSel.cuadrilla,
-      tipo:             tipoMap[tipo],
-      monto:            montoPorTipo,
-      fecha:            t.date,
-      hora:             t.time,
-      diaSemana:        t.dayName,
-      nota,
-      ts:               t.ts,
-      synced:           0,
-      remoteId:         null
-    };
-    await dbAdd('movimientos', mov);
-  }
-
-  const msg = tipos.length > 1
-    ? `✅ ${workerSel.nombre} · ${tipos.map(t=>tipoMap[t]).join('+')} · $${monto}`
-    : `✅ ${workerSel.nombre} · ${tipoMap[tipos[0]]} · $${monto}`;
-  showToast(msg);
-
-  // Reset parcial (mantiene trabajador para rapidez)
-  clearMonto();
-  document.getElementById('inp-nota').value = '';
-  renderLogHoy();
-  updatePendingCount();
-  if (navigator.onLine) syncNow();
-}
-
-// ════════════════════════════════
-// LOG HOY
-// ════════════════════════════════
-async function renderLogHoy() {
-  const hoy  = tzNow().date;
-  const movs = (await dbByIndex('movimientos','fecha',hoy)).sort((a,b)=>b.ts-a.ts);
-  document.getElementById('cnt-hoy').textContent = movs.length ? `${movs.length} mov.` : '';
-  const el = document.getElementById('log-hoy');
-  if (!movs.length) {
-    el.innerHTML='<p style="padding:16px;text-align:center;color:var(--text3);font-size:.88rem;">Sin movimientos hoy</p>';
-    return;
-  }
-  const bClass = { Desayuno:'badge-D', Comida:'badge-C', Soda:'badge-S', Abono:'badge-A' };
-  el.innerHTML = movs.map(m => `
-    <div class="log-row">
-      <div style="display:flex;align-items:center;gap:8px;min-width:0;flex:1;">
-        <span class="badge ${bClass[m.tipo]||'badge-C'}">${m.tipo}</span>
-        <div style="min-width:0;">
-          <div style="font-size:.9rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${m.trabajadorNombre}</div>
-          ${m.nota?`<div style="font-size:.72rem;color:var(--text3);">${m.nota}</div>`:''}
-        </div>
+      <div>
+        <label class="text-xs text-slate-400 block mb-1">Cuadrilla / Sección</label>
+        <input id="nuevoTrabCuadrilla" type="text" list="listaCuadrillasSugeridas" placeholder="Ej. Carpinteros, Loseta..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white" />
+        <datalist id="listaCuadrillasSugeridas">
+          <option value="Carpinteros"></option>
+          <option value="Loseta"></option>
+          <option value="Albañiles"></option>
+          <option value="Fierreros"></option>
+          <option value="Plomeros"></option>
+          <option value="Eléctricos"></option>
+        </datalist>
       </div>
-      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
-        <div style="text-align:right;">
-          <div style="font-weight:700;${m.tipo==='Abono'?'color:var(--green)':''};">${m.tipo==='Abono'?'+':'-'}$${m.monto}</div>
-          <div style="font-size:.7rem;color:var(--text3);">${m.hora}</div>
-        </div>
-        <button onclick="deleteMov(${m.id})" style="background:var(--red-l);color:var(--red);border:none;border-radius:8px;width:28px;height:28px;font-size:.85rem;cursor:pointer;">✕</button>
+      <div>
+        <label class="text-xs text-slate-400 block mb-1">Saldo Pendiente Anterior ($)</label>
+        <input id="nuevoTrabSaldoAnt" type="number" value="0" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white" />
+      </div>
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="cerrarModalTrabajador()" class="px-4 py-2 rounded-xl bg-slate-700 text-slate-300 text-sm font-bold">Cancelar</button>
+        <button onclick="guardarNuevoTrabajador()" class="px-4 py-2 rounded-xl bg-emerald-500 text-slate-950 text-sm font-black">Guardar</button>
       </div>
     </div>
-  `).join('');
-}
+  </div>
 
-async function deleteMov(id) {
-  if (!confirm('¿Eliminar este movimiento?')) return;
-  const mov = await dbGet('movimientos', id);
-  // Si tiene remoteId, notificar a Sheets que lo borre
-  if (mov?.remoteId && navigator.onLine) {
-    const wh = await dbGet('config','webhook');
-    if (wh?.value) {
-      fetch(wh.value, {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ action:'delete', remoteId: mov.remoteId })
-      }).catch(()=>{});
+  <!-- MODAL: CONFIGURACIÓN WEBHOOK GOOGLE SHEETS -->
+  <div id="modalConfig" class="fixed inset-0 bg-black/75 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-lg w-full p-5 space-y-4">
+      <h3 class="text-lg font-black text-white">Configuración de Sincronización</h3>
+      <p class="text-xs text-slate-400">Pega aquí la URL de la aplicación web generada al publicar tu script <code>Code.gs</code> en Google Sheets.</p>
+      <div>
+        <label class="text-xs text-slate-400 block mb-1">URL del Webhook (Google Apps Script)</label>
+        <input id="inputWebhookUrl" type="url" placeholder="https://script.google.com/macros/s/.../exec" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white font-mono" />
+      </div>
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="cerrarModalConfig()" class="px-4 py-2 rounded-xl bg-slate-700 text-slate-300 text-sm font-bold">Cerrar</button>
+        <button onclick="guardarConfigWebhook()" class="px-4 py-2 rounded-xl bg-amber-500 text-slate-950 text-sm font-black">Guardar URL</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST DE NOTIFICACIÓN -->
+  <div id="toast" class="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 hidden bg-slate-950 border border-amber-400 text-white px-4 py-2.5 rounded-xl shadow-2xl text-sm font-bold"></div>
+
+  <script>
+    // =========================================================================
+    // 1. UTILIDAD ESTRICTA DE ZONA HORARIA: AMERICA/TIJUANA
+    // =========================================================================
+    const TZ_TIJUANA = 'America/Tijuana';
+    const DIAS_SEMANA = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+
+    function obtenerTiempoTijuana(dateObj = new Date()) {
+      const partes = new Intl.DateTimeFormat('en-CA', {
+        timeZone: TZ_TIJUANA,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      }).formatToParts(dateObj);
+
+      const map = {};
+      partes.forEach(p => map[p.type] = p.value);
+
+      const fecha = `${map.year}-${map.month}-${map.day}`;
+      const hora = `${map.hour === '24' ? '00' : map.hour}:${map.minute}:${map.second}`;
+
+      const diaRaw = new Intl.DateTimeFormat('es-MX', {
+        timeZone: TZ_TIJUANA,
+        weekday: 'long'
+      }).format(dateObj).toLowerCase();
+
+      const mapaDias = {
+        'lunes': 'Lunes',
+        'martes': 'Martes',
+        'miércoles': 'Miércoles',
+        'miercoles': 'Miércoles',
+        'jueves': 'Jueves',
+        'viernes': 'Viernes',
+        'sábado': 'Sábado',
+        'sabado': 'Sábado',
+        'domingo': 'Domingo'
+      };
+
+      const diaSemana = mapaDias[diaRaw] || 'Lunes';
+      return { fecha, hora, diaSemana, isoTijuana: `${fecha}T${hora}` };
     }
-  }
-  await dbDel('movimientos', id);
-  renderLogHoy();
-  showToast('Movimiento eliminado');
-}
 
-// ════════════════════════════════
-// RESUMEN
-// ════════════════════════════════
-async function buildResumen() {
-  const cuadF = document.getElementById('sel-res-cuad').value;
-  const semV  = document.getElementById('sel-semana').value;
-  let start, end;
-  if (semV==='current') { const wb=getWeekBounds(); start=wb.start; end=wb.end; }
-  else { [start,end] = semV.split('|'); }
+    function actualizarRelojUI() {
+      const t = obtenerTiempoTijuana();
+      document.getElementById('relojTijuana').textContent = `📍 TJ: ${t.diaSemana} ${t.fecha} ${t.hora.slice(0,5)}`;
+    }
+    setInterval(actualizarRelojUI, 10000);
 
-  let movs = await dbGetAll('movimientos');
-  movs = movs.filter(m => m.fecha>=start && m.fecha<=end);
-  if (cuadF) movs = movs.filter(m => m.cuadrilla===cuadF);
+    // =========================================================================
+    // 2. INDEXEDDB (ALMACENAMIENTO OFFLINE-FIRST)
+    // =========================================================================
+    const DB_NAME = 'ObraComidasPWA_DB';
+    const DB_VERSION = 1;
+    let db = null;
 
-  const todosMovs = await dbGetAll('movimientos');
-  const mapaW = {};
-  movs.forEach(m => {
-    if (!mapaW[m.trabajadorId]) mapaW[m.trabajadorId] = {
-      nombre:m.trabajadorNombre, cuadrilla:m.cuadrilla||'',
-      des:0, com:0, sod:0, abon:0, total:0
+    // Estado en memoria para respuesta instantánea en UI
+    let estado = {
+      trabajadores: [],
+      movimientos: [],
+      cuadrillaFiltro: 'TODAS',
+      trabajadorSeleccionadoId: null,
+      tipoSeleccionado: 'Desayuno',
+      montoActual: 0,
+      historialPulsaciones: [],
+      webhookUrl: localStorage.getItem('webhook_gas_url') || ''
     };
-    const w = mapaW[m.trabajadorId];
-    if (m.tipo==='Desayuno') { w.des+=m.monto; w.total+=m.monto; }
-    else if (m.tipo==='Comida') { w.com+=m.monto; w.total+=m.monto; }
-    else if (m.tipo==='Soda')   { w.sod+=m.monto; w.total+=m.monto; }
-    else if (m.tipo==='Abono')  { w.abon+=m.monto; }
-  });
 
-  // Saldo anterior
-  for (const [wid, data] of Object.entries(mapaW)) {
-    const prev = todosMovs.filter(m=>m.trabajadorId==wid && m.fecha<start);
-    const pC = prev.filter(m=>m.tipo!=='Abono').reduce((s,m)=>s+m.monto,0);
-    const pA = prev.filter(m=>m.tipo==='Abono').reduce((s,m)=>s+m.monto,0);
-    data.saldoPrev  = Math.max(0,pC-pA);
-    data.saldoActual= (data.total+data.saldoPrev) - data.abon;
-  }
+    function initDB() {
+      return new Promise((resolve, reject) => {
+        const req = indexedDB.open(DB_NAME, DB_VERSION);
+        req.onupgradeneeded = (e) => {
+          const d = e.target.result;
+          if (!d.objectStoreNames.contains('trabajadores')) {
+            d.createObjectStore('trabajadores', { keyPath: 'id' });
+          }
+          if (!d.objectStoreNames.contains('movimientos')) {
+            const storeMov = d.createObjectStore('movimientos', { keyPath: 'uuid' });
+            storeMov.createIndex('synced', 'synced', { unique: false });
+          }
+        };
+        req.onsuccess = (e) => {
+          db = e.target.result;
+          resolve(db);
+        };
+        req.onerror = (e) => reject(e.target.error);
+      });
+    }
 
-  const rows = Object.values(mapaW).sort((a,b)=>b.saldoActual-a.saldoActual);
-  const totC = rows.reduce((s,r)=>s+r.total,0);
-  const totA = rows.reduce((s,r)=>s+r.abon,0);
-  const totD = rows.reduce((s,r)=>s+Math.max(0,r.saldoActual),0);
-  document.getElementById('kpi-cons').textContent  = `$${totC}`;
-  document.getElementById('kpi-abon').textContent  = `$${totA}`;
-  document.getElementById('kpi-deuda').textContent = `$${totD}`;
+    function dbGetAll(storeName) {
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(storeName, 'readonly');
+        const req = tx.objectStore(storeName).getAll();
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+    }
 
-  window._resumen = rows;
-  window._resumenPeriodo = `${start}|${end}`;
+    function dbPut(storeName, item) {
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(storeName, 'readwrite');
+        tx.objectStore(storeName).put(item);
+        tx.oncomplete = () => resolve(item);
+        tx.onerror = () => reject(tx.error);
+      });
+    }
 
-  if (!rows.length) {
-    document.getElementById('tabla-res').innerHTML =
-      '<p style="text-align:center;color:var(--text3);padding:24px;">Sin datos en esta semana</p>';
-    return;
-  }
+    function dbDelete(storeName, key) {
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(storeName, 'readwrite');
+        tx.objectStore(storeName).delete(key);
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+      });
+    }
 
-  document.getElementById('tabla-res').innerHTML = rows.map(r => `
-    <div class="res-card">
-      <div class="res-header">
-        <div>
-          <div style="font-weight:700;font-size:1rem;">${r.nombre}</div>
-          <div style="font-size:.75rem;color:var(--text2);">${r.cuadrilla}</div>
-          ${r.saldoPrev>0?`<div style="font-size:.75rem;color:var(--orange);margin-top:2px;">⚠ Saldo ant: $${r.saldoPrev}</div>`:''}
-        </div>
-        <div style="text-align:right;">
-          <div style="font-size:1.3rem;font-weight:900;color:${r.saldoActual>0?'var(--red)':'var(--green)'};">
-            ${r.saldoActual>0?`Debe $${r.saldoActual}`:'✓ Liquidado'}
-          </div>
-          <div style="font-size:.72rem;color:var(--text3);">Semana: $${r.total} | Abonó: $${r.abon}</div>
-        </div>
-      </div>
-      <div class="res-grid">
-        <div class="res-cell">
-          <div class="label" style="color:#CC7700;">🍳 Desay.</div>
-          <div class="val">${r.des>0?'$'+r.des:'-'}</div>
-        </div>
-        <div class="res-cell">
-          <div class="label" style="color:#005CC5;">🍽️ Comida</div>
-          <div class="val">${r.com>0?'$'+r.com:'-'}</div>
-        </div>
-        <div class="res-cell">
-          <div class="label" style="color:#8A3DB2;">🥤 Soda</div>
-          <div class="val">${r.sod>0?'$'+r.sod:'-'}</div>
-        </div>
-        <div class="res-cell">
-          <div class="label" style="color:var(--green);">💵 Abono</div>
-          <div class="val" style="color:var(--green);">${r.abon>0?'+$'+r.abon:'-'}</div>
-        </div>
-      </div>
-    </div>
-  `).join('');
-}
+    function dbClear(storeName) {
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(storeName, 'readwrite');
+        tx.objectStore(storeName).clear();
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+      });
+    }
 
-// ════════════════════════════════
-// EXCEL MEJORADO
-// ════════════════════════════════
-async function downloadExcel() {
-  if (!window._resumen) { await buildResumen(); }
-  const rows   = window._resumen || [];
-  const periodo= window._resumenPeriodo || '';
-  const [start,end] = periodo.split('|');
-  const todosMovs   = await dbGetAll('movimientos');
-  const movsSem = todosMovs.filter(m=>(!start||m.fecha>=start)&&(!end||m.fecha<=end))
-                           .sort((a,b)=>a.ts-b.ts);
+    // =========================================================================
+    // 3. CARGA INICIAL Y DATOS SEMILLA DE EJEMPLO
+    // =========================================================================
+    async function cargarDatosIniciales() {
+      await initDB();
+      estado.trabajadores = await dbGetAll('trabajadores');
+      estado.movimientos = await dbGetAll('movimientos');
 
-  const wb = XLSX.utils.book_new();
-
-  // ── Hoja 1: RESUMEN ──────────────────────────────────
-  const wbData = [
-    // Título
-    [`CONTROL SEMANAL DE COMIDAS — ${start} al ${end}`,'','','','','','','',''],
-    ['Generado:', new Date().toLocaleString('es-MX', {timeZone: TZ}),'','','','','','',''],
-    [],
-    ['#','Nombre','Cuadrilla','Saldo Ant.','Desayunos','Comidas','Sodas','Total Semana','Abonado','Saldo Actual','Estado'],
-  ];
-  rows.forEach((r,i) => wbData.push([
-    i+1, r.nombre, r.cuadrilla||'—',
-    r.saldoPrev, r.des, r.com, r.sod,
-    r.total, r.abon, r.saldoActual,
-    r.saldoActual>0 ? `Debe $${r.saldoActual}` : 'Liquidado'
-  ]));
-  // Totales
-  wbData.push([]);
-  wbData.push(['','TOTALES','',
-    rows.reduce((s,r)=>s+r.saldoPrev,0),
-    rows.reduce((s,r)=>s+r.des,0),
-    rows.reduce((s,r)=>s+r.com,0),
-    rows.reduce((s,r)=>s+r.sod,0),
-    rows.reduce((s,r)=>s+r.total,0),
-    rows.reduce((s,r)=>s+r.abon,0),
-    rows.reduce((s,r)=>s+Math.max(0,r.saldoActual),0),
-    ''
-  ]);
-
-  const ws1 = XLSX.utils.aoa_to_sheet(wbData);
-  // Anchos de columna
-  ws1['!cols'] = [5,22,14,12,12,12,12,14,12,14,16].map(w=>({wch:w}));
-  // Merge título
-  ws1['!merges'] = [{ s:{r:0,c:0}, e:{r:0,c:10} }];
-  XLSX.utils.book_append_sheet(wb, ws1, 'Resumen');
-
-  // ── Hoja 2: CONTROL SEMANAL (formato obra) ──────────
-  const dias   = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
-  const encH1  = ['Nombre','Cuadrilla'];
-  const encH2  = ['',''];
-  dias.forEach(d => { encH1.push(d,'',''); encH2.push('Des','Com','Soda'); });
-  encH1.push('Total','Abonado','Saldo');
-  encH2.push('','','');
-  const semData = [encH1, encH2];
-  rows.forEach(r => {
-    // Obtener desglose por día
-    const mv_r = movsSem.filter(m=>m.trabajadorId==
-      (allWorkers.find(w=>w.nombre===r.nombre)?.id));
-    const byDay = {};
-    dias.forEach(d=>{byDay[d]={D:0,C:0,S:0};});
-    mv_r.forEach(m=>{
-      const d=m.diaSemana;
-      if(!byDay[d]) return;
-      if(m.tipo==='Desayuno') byDay[d].D+=m.monto;
-      else if(m.tipo==='Comida') byDay[d].C+=m.monto;
-      else if(m.tipo==='Soda')   byDay[d].S+=m.monto;
-    });
-    const fila=[r.nombre, r.cuadrilla||''];
-    dias.forEach(d=>{ fila.push(byDay[d].D||'',byDay[d].C||'',byDay[d].S||''); });
-    fila.push(r.total, r.abon, r.saldoActual);
-    semData.push(fila);
-  });
-  const ws2 = XLSX.utils.aoa_to_sheet(semData);
-  ws2['!cols'] = [22,14,...Array(18).fill({wch:8}),12,12,12];
-  XLSX.utils.book_append_sheet(wb, ws2, 'Control_Semanal');
-
-  // ── Hoja 3: MOVIMIENTOS DETALLE ──────────────────────
-  const det = [['ID','Fecha','Hora','Día','Trabajador','Cuadrilla','Tipo','Monto','Nota','Sincronizado']];
-  movsSem.forEach(m => det.push([
-    m.remoteId||m.id, m.fecha, m.hora, m.diaSemana,
-    m.trabajadorNombre, m.cuadrilla||'', m.tipo, m.monto,
-    m.nota||'', m.synced?'Sí':'Pendiente'
-  ]));
-  const ws3 = XLSX.utils.aoa_to_sheet(det);
-  ws3['!cols'] = [10,12,8,12,22,14,12,10,20,12].map(w=>({wch:w}));
-  XLSX.utils.book_append_sheet(wb, ws3, 'Detalle_Movimientos');
-
-  // ── Hoja 4: DEUDORES ────────────────────────────────
-  const deudores = rows.filter(r=>r.saldoActual>0).sort((a,b)=>b.saldoActual-a.saldoActual);
-  const deudData = [
-    ['DEUDORES — Por cobrar',''],
-    [],
-    ['Nombre','Cuadrilla','Consumió','Abonó','Debe']
-  ];
-  deudores.forEach(r=>deudData.push([r.nombre,r.cuadrilla||'—',r.total+r.saldoPrev,r.abon,r.saldoActual]));
-  deudData.push([]);
-  deudData.push(['TOTAL POR COBRAR','','','',deudores.reduce((s,r)=>s+r.saldoActual,0)]);
-  const ws4 = XLSX.utils.aoa_to_sheet(deudData);
-  ws4['!cols'] = [22,14,12,12,12].map(w=>({wch:w}));
-  ws4['!merges'] = [{ s:{r:0,c:0}, e:{r:0,c:4} }];
-  XLSX.utils.book_append_sheet(wb, ws4, 'Deudores');
-
-  XLSX.writeFile(wb, `Comidas_${start}_${end}.xlsx`);
-  showToast('📥 Excel descargado con 4 hojas');
-}
-
-// ════════════════════════════════
-// SYNC → SHEETS
-// ════════════════════════════════
-async function syncNow() {
-  const wh = await dbGet('config','webhook');
-  if (!wh?.value) return;
-  const movs    = await dbGetAll('movimientos');
-  const pending = movs.filter(m=>!m.synced);
-  if (!pending.length) return;
-  try {
-    const res = await fetch(wh.value, {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ action:'sync', movimientos: pending })
-    });
-    if (res.ok) {
-      const data = await res.json();
-      // Sheets devuelve remoteIds asignados
-      for (let i=0; i<pending.length; i++) {
-        pending[i].synced   = 1;
-        pending[i].remoteId = data.remoteIds?.[i] ?? null;
-        await dbPut('movimientos', pending[i]);
+      if (estado.trabajadores.length === 0) {
+        const semilla = [
+          { id: 'T1', nombre: 'Juan "El Chino"', cuadrilla: 'Carpinteros', saldoAnterior: 0 },
+          { id: 'T2', nombre: 'Maestro Roberto', cuadrilla: 'Carpinteros', saldoAnterior: 120 },
+          { id: 'T3', nombre: 'Carlos "El Güero"', cuadrilla: 'Loseta', saldoAnterior: 0 },
+          { id: 'T4', nombre: 'Miguel Ángel', cuadrilla: 'Loseta', saldoAnterior: 50 },
+          { id: 'T5', nombre: 'Don Chuy', cuadrilla: 'Albañiles', saldoAnterior: 0 },
+          { id: 'T6', nombre: 'Pedro Fierrero', cuadrilla: 'Fierreros', saldoAnterior: 0 }
+        ];
+        for (const t of semilla) await dbPut('trabajadores', t);
+        estado.trabajadores = semilla;
       }
-      showToast(`☁️ ${pending.length} sincronizados`);
-      updatePendingCount();
+
+      actualizarRelojUI();
+      actualizarEstadoRed();
+      renderTodo();
     }
-  } catch(e) { /* offline, no pasa nada */ }
-}
 
-// PULL desde Sheets (cuando borraron en el Excel)
-async function pullFromSheets() {
-  const wh = await dbGet('config','webhook');
-  if (!wh?.value) { showToast('⚠️ Configura el webhook primero'); return; }
-  if (!navigator.onLine) { showToast('⚠️ Necesitas conexión'); return; }
-  showToast('⬇ Importando desde Sheets…');
-  try {
-    const res  = await fetch(`${wh.value}?action=pull`);
-    const data = await res.json();
-    if (!data.movimientos) { showToast('❌ Sin datos'); return; }
-    // Reemplazar movimientos sincronizados con los de Sheets
-    const locales   = await dbGetAll('movimientos');
-    const pendientes= locales.filter(m=>!m.synced);
-    // Borrar todos los sincronizados
-    for (const m of locales.filter(m=>m.synced)) await dbDel('movimientos', m.id);
-    // Insertar los de Sheets
-    for (const m of data.movimientos) {
-      await dbAdd('movimientos', { ...m, synced:1 });
+    function renderTodo() {
+      renderChipsCuadrillas();
+      renderListaTrabajadores();
+      renderUltimosMovimientos();
+      renderTablaResumen();
+      actualizarContadorPendientes();
+      actualizarBannerSeleccionado();
     }
-    renderLogHoy();
-    showToast(`✅ Importados ${data.movimientos.length} registros`);
-  } catch(e) { showToast('❌ Error al importar: '+e.message); }
-}
 
-async function updatePendingCount() {
-  const movs = await dbGetAll('movimientos');
-  const n    = movs.filter(m=>!m.synced).length;
-  document.getElementById('cnt-pending').textContent = n;
-  document.getElementById('lbl-pending').style.display = n>0?'inline':'none';
-  document.getElementById('btn-sync').style.display =
-    (n>0 && navigator.onLine) ? 'inline-block' : 'none';
-}
+    // =========================================================================
+    // 4. LÓGICA DE INTERFAZ: PESTAÑA 1 (REGISTRO ULTRA RÁPIDO)
+    // =========================================================================
+    function obtenerCuadrillasUnicas() {
+      const set = new Set(['Carpinteros', 'Loseta', 'Albañiles', 'Fierreros']);
+      estado.trabajadores.forEach(t => { if (t.cuadrilla) set.add(t.cuadrilla); });
+      return ['TODAS', ...Array.from(set)];
+    }
 
-function updateStatusBar() {
-  const on = navigator.onLine;
-  const dot = document.getElementById('dot-status');
-  dot.style.background = on ? 'var(--green)' : 'var(--red)';
-  document.getElementById('lbl-status').textContent = on ? 'En línea' : 'Sin conexión';
-}
+    function renderChipsCuadrillas() {
+      const cont = document.getElementById('contenedorCuadrillas');
+      const selectResumen = document.getElementById('filtroResumenCuadrilla');
+      const cuadrillas = obtenerCuadrillasUnicas();
 
-// ════════════════════════════════
-// HISTORIAL SEMANAS
-// ════════════════════════════════
-async function loadHistWeeks() {
-  const movs = await dbGetAll('movimientos');
-  const sems  = new Set();
-  movs.forEach(m => {
-    const d = new Date(m.fecha+'T12:00:00');
-    const dow = d.getDay();
-    const diff= dow===0?-6:1-dow;
-    const mon = new Date(d); mon.setDate(d.getDate()+diff);
-    const sat = new Date(mon); sat.setDate(mon.getDate()+5);
-    const iso = x=>x.toISOString().split('T')[0];
-    sems.add(`${iso(mon)}|${iso(sat)}`);
-  });
-  const sel = document.getElementById('sel-semana');
-  sel.innerHTML = '<option value="current">Semana actual</option>';
-  [...sems].sort().reverse().forEach(s=>{
-    const [a,b]=s.split('|');
-    const o=document.createElement('option'); o.value=s; o.textContent=`${a} → ${b}`;
-    sel.appendChild(o);
-  });
-}
+      cont.innerHTML = cuadrillas.map(c => {
+        const activo = estado.cuadrillaFiltro === c;
+        return `<button onclick="filtrarPorCuadrilla('${c}')" class="btn-active whitespace-nowrap px-3.5 py-1.5 rounded-xl text-xs font-extrabold transition-all ${
+          activo ? 'bg-amber-400 text-slate-950 shadow' : 'bg-slate-900 text-slate-300 border border-slate-700'
+        }">${c}</button>`;
+      }).join('');
 
-// ════════════════════════════════
-// CONFIG — CUADRILLAS
-// ════════════════════════════════
-function renderCuadSelects() {
-  ['sel-cuadrilla','sel-res-cuad'].forEach(id=>{
-    const el=document.getElementById(id); if(!el) return;
-    el.innerHTML='<option value="">Todas</option>';
-    allCuad.forEach(c=>{ const o=document.createElement('option'); o.value=o.textContent=c; el.appendChild(o); });
-  });
-}
-function renderCuadList() {
-  const el = document.getElementById('list-cuad');
-  if (!el) return;
-  el.innerHTML = allCuad.length
-    ? allCuad.map(c=>`
-      <div style="display:flex;justify-content:space-between;align-items:center;
-        background:var(--bg);border-radius:10px;padding:10px 14px;">
-        <span style="font-weight:600;">${c}</span>
-        <button onclick="delCuad('${c}')" style="background:var(--red-l);color:var(--red);border:none;border-radius:8px;padding:4px 10px;font-weight:700;cursor:pointer;">✕</button>
-      </div>
-    `).join('')
-    : '<p style="color:var(--text3);font-size:.85rem;">Sin cuadrillas</p>';
-}
-async function addCuadrilla() {
-  const v=document.getElementById('inp-new-cuad').value.trim();
-  if(!v||allCuad.includes(v)) return;
-  allCuad.push(v);
-  await dbPut('config',{key:'cuadrillas',value:allCuad});
-  document.getElementById('inp-new-cuad').value='';
-  renderCuadSelects(); renderCuadList();
-  showToast(`Cuadrilla "${v}" agregada`);
-}
-async function delCuad(name) {
-  if(!confirm(`¿Eliminar "${name}"?`)) return;
-  allCuad=allCuad.filter(c=>c!==name);
-  await dbPut('config',{key:'cuadrillas',value:allCuad});
-  renderCuadSelects(); renderCuadList();
-}
+      const valActual = selectResumen.value || 'TODAS';
+      selectResumen.innerHTML = cuadrillas.map(c => `<option value="${c}">${c === 'TODAS' ? 'Todas las cuadrillas' : c}</option>`).join('');
+      selectResumen.value = valActual;
+    }
 
-// ════════════════════════════════
-// CONFIG — TRABAJADORES
-// ════════════════════════════════
-function renderWorkersCfg() {
-  const q = document.getElementById('inp-cfg-search').value.toLowerCase();
-  let list= allWorkers;
-  if(q) list=list.filter(w=>w.nombre.toLowerCase().includes(q));
-  document.getElementById('list-workers-cfg').innerHTML = list.length
-    ? list.map(w=>`
-      <div style="display:flex;justify-content:space-between;align-items:center;
-        background:var(--bg);border-radius:12px;padding:11px 14px;">
-        <div>
-          <div style="font-weight:600;">${w.nombre}</div>
-          <div style="font-size:.75rem;color:var(--text3);">${w.cuadrilla||'Sin cuadrilla'}</div>
+    function filtrarPorCuadrilla(cuadrilla) {
+      estado.cuadrillaFiltro = cuadrilla;
+      renderChipsCuadrillas();
+      renderListaTrabajadores();
+    }
+
+    function limpiarBusquedaTrabajador() {
+      document.getElementById('inputBuscarTrabajador').value = '';
+      renderListaTrabajadores();
+    }
+
+    function calcularMetricasTrabajador(trabajadorId) {
+      const trab = estado.trabajadores.find(t => t.id === trabajadorId);
+      const saldoAnterior = trab ? Number(trab.saldoAnterior || 0) : 0;
+      const movs = estado.movimientos.filter(m => m.trabajadorId === trabajadorId);
+
+      let consumoSemana = 0;
+      let abonosSemana = 0;
+      const porDia = {};
+      DIAS_SEMANA.forEach(d => porDia[d] = { Desayuno: 0, Comida: 0, Soda: 0, Abono: 0 });
+
+      for (const m of movs) {
+        const monto = Number(m.monto || 0);
+        if (!porDia[m.diaSemana]) porDia[m.diaSemana] = { Desayuno: 0, Comida: 0, Soda: 0, Abono: 0 };
+        porDia[m.diaSemana][m.tipo] = (porDia[m.diaSemana][m.tipo] || 0) + monto;
+
+        if (m.tipo === 'Abono') {
+          abonosSemana += monto;
+        } else {
+          consumoSemana += monto;
+        }
+      }
+
+      const saldoActual = saldoAnterior + consumoSemana - abonosSemana;
+      return { saldoAnterior, consumoSemana, abonosSemana, saldoActual, porDia };
+    }
+
+    function renderListaTrabajadores() {
+      const texto = (document.getElementById('inputBuscarTrabajador').value || '').toLowerCase().trim();
+      const grid = document.getElementById('gridTrabajadores');
+
+      const filtrados = estado.trabajadores.filter(t => {
+        const coincideCuadrilla = estado.cuadrillaFiltro === 'TODAS' || t.cuadrilla === estado.cuadrillaFiltro;
+        const coincideTexto = !texto || t.nombre.toLowerCase().includes(texto) || t.cuadrilla.toLowerCase().includes(texto);
+        return coincideCuadrilla && coincideTexto;
+      });
+
+      grid.innerHTML = filtrados.map(t => {
+        const seleccionado = estado.trabajadorSeleccionadoId === t.id;
+        const { saldoActual } = calcularMetricasTrabajador(t.id);
+        return `
+          <button onclick="seleccionarTrabajador('${t.id}')" class="btn-active text-left p-2.5 rounded-xl border-2 transition-all flex flex-col justify-between ${
+            seleccionado ? 'bg-amber-500/20 border-amber-400' : 'bg-slate-900 border-slate-700 hover:border-slate-500'
+          }">
+            <div class="font-extrabold text-sm text-white truncate">${t.nombre}</div>
+            <div class="flex items-center justify-between mt-1">
+              <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">${t.cuadrilla}</span>
+              <span class="text-xs font-black ${saldoActual > 0 ? 'text-rose-400' : 'text-emerald-400'}">$${saldoActual}</span>
+            </div>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function seleccionarTrabajador(id) {
+      estado.trabajadorSeleccionadoId = id;
+      renderListaTrabajadores();
+      actualizarBannerSeleccionado();
+    }
+
+    function actualizarBannerSeleccionado() {
+      const banner = document.getElementById('bannerTrabajadorSeleccionado');
+      const trab = estado.trabajadores.find(t => t.id === estado.trabajadorSeleccionadoId);
+      if (!trab) {
+        banner.classList.add('hidden');
+        return;
+      }
+      banner.classList.remove('hidden');
+      const { saldoActual } = calcularMetricasTrabajador(trab.id);
+      document.getElementById('lblTrabajadorActivo').textContent = trab.nombre;
+      document.getElementById('lblCuadrillaActiva').textContent = trab.cuadrilla;
+      const elDeuda = document.getElementById('lblDeudaActiva');
+      elDeuda.textContent = `$${saldoActual}`;
+      elDeuda.className = `text-base font-black ${saldoActual > 0 ? 'text-rose-400' : 'text-emerald-400'}`;
+    }
+
+    function seleccionarTipo(tipo) {
+      estado.tipoSeleccionado = tipo;
+      const estilos = {
+        'Desayuno': 'bg-amber-500/20 border-amber-400 text-amber-300',
+        'Comida': 'bg-orange-500/20 border-orange-400 text-orange-300',
+        'Soda': 'bg-cyan-500/20 border-cyan-400 text-cyan-300',
+        'Abono': 'bg-emerald-500/20 border-emerald-400 text-emerald-300'
+      };
+
+      ['Desayuno', 'Comida', 'Soda', 'Abono'].forEach(t => {
+        const btn = document.getElementById(`btnTipo-${t}`);
+        if (t === tipo) {
+          btn.className = `btn-active py-3 px-2 rounded-xl font-extrabold text-sm border-2 flex flex-col items-center gap-1 ${estilos[t]}`;
+        } else {
+          btn.className = 'btn-active py-3 px-2 rounded-xl font-extrabold text-sm border-2 flex flex-col items-center gap-1 bg-slate-900 border-slate-700 text-slate-400';
+        }
+      });
+
+      const lbl = document.getElementById('lblTipoEnTotalizador');
+      lbl.textContent = tipo === 'Soda' ? 'Soda / Extra' : (tipo === 'Abono' ? 'Abono / Pago' : tipo);
+    }
+
+    function sumarMonto(valor) {
+      estado.montoActual += valor;
+      estado.historialPulsaciones.push(`+$${valor}`);
+      actualizarDisplayMonto();
+    }
+
+    function limpiarMonto() {
+      estado.montoActual = 0;
+      estado.historialPulsaciones = [];
+      actualizarDisplayMonto();
+    }
+
+    function actualizarDisplayMonto() {
+      document.getElementById('displayMonto').textContent = `$${estado.montoActual}`;
+      document.getElementById('lblHistorialSuma').textContent =
+        estado.historialPulsaciones.length > 0
+          ? estado.historialPulsaciones.join(' ')
+          : 'Toque los billetes/monedas...';
+    }
+
+    async function registrarMovimiento() {
+      if (!estado.trabajadorSeleccionadoId) {
+        mostrarToast('⚠️ Primero selecciona un trabajador');
+        return;
+      }
+      if (estado.montoActual <= 0) {
+        mostrarToast('⚠️ Toca los botones de dinero para indicar el monto');
+        return;
+      }
+
+      const trab = estado.trabajadores.find(t => t.id === estado.trabajadorSeleccionadoId);
+      const tiempoTJ = obtenerTiempoTijuana();
+
+      const nuevoMov = {
+        uuid: crypto.randomUUID ? crypto.randomUUID() : ('MOV-' + Date.now() + '-' + Math.random().toString(36).slice(2,7)),
+        trabajadorId: trab.id,
+        nombre: trab.nombre,
+        cuadrilla: trab.cuadrilla,
+        tipo: estado.tipoSeleccionado,
+        monto: estado.montoActual,
+        fechaTijuana: tiempoTJ.fecha,
+        horaTijuana: tiempoTJ.hora,
+        diaSemana: tiempoTJ.diaSemana,
+        synced: 0,
+        timestamp: Date.now()
+      };
+
+      await dbPut('movimientos', nuevoMov);
+      estado.movimientos.push(nuevoMov);
+
+      limpiarMonto();
+      renderTodo();
+      mostrarToast(`✅ Registrado: ${trab.nombre} • ${nuevoMov.tipo} $${nuevoMov.monto}`);
+
+      if (navigator.onLine && estado.webhookUrl) {
+        sincronizarConSheets(true);
+      }
+    }
+
+    function renderUltimosMovimientos() {
+      const cont = document.getElementById('listaUltimosMovimientos');
+      const ultimos = [...estado.movimientos].sort((a, b) => b.timestamp - a.timestamp).slice(0, 6);
+
+      if (ultimos.length === 0) {
+        cont.innerHTML = `<p class="text-slate-500">Sin movimientos registrados todavía.</p>`;
+        return;
+      }
+
+      cont.innerHTML = ultimos.map(m => `
+        <div class="flex items-center justify-between bg-slate-900 border border-slate-800 px-3 py-2 rounded-xl">
+          <div>
+            <span class="font-bold text-white">${m.nombre}</span>
+            <span class="text-slate-400">(${m.cuadrilla})</span>
+            <span class="ml-1 px-1.5 py-0.5 rounded text-[10px] font-bold ${
+              m.tipo === 'Abono' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300'
+            }">${m.tipo}</span>
+            <span class="text-slate-500 ml-1">${m.diaSemana} ${m.horaTijuana.slice(0,5)}</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="font-extrabold ${m.tipo === 'Abono' ? 'text-emerald-400' : 'text-white'}">$${m.monto}</span>
+            <span title="${m.synced ? 'Sincronizado' : 'Pendiente de sincronizar'}">${m.synced ? '☁️' : '⏳'}</span>
+            <button onclick="eliminarMovimiento('${m.uuid}')" class="text-rose-400 hover:text-rose-300 font-bold px-1" title="Eliminar registro">✕</button>
+          </div>
         </div>
-        <div style="display:flex;gap:8px;">
-          <button onclick="openEditWorker(${w.id})" style="background:var(--blue-l);color:var(--blue);border:none;border-radius:8px;padding:6px 12px;font-weight:600;cursor:pointer;">✏️</button>
-          <button onclick="delWorker(${w.id})" style="background:var(--red-l);color:var(--red);border:none;border-radius:8px;padding:6px 10px;font-weight:700;cursor:pointer;">✕</button>
-        </div>
-      </div>
-    `).join('')
-    : '<p style="color:var(--text3);text-align:center;padding:16px;font-size:.88rem;">Sin resultados</p>';
-}
+      `).join('');
+    }
 
-function openAddWorker()  { openModal('➕ Nuevo trabajador', workerForm(null)); }
-function openEditWorker(id){ openModal('✏️ Editar', workerForm(allWorkers.find(w=>w.id===id))); }
+    async function eliminarMovimiento(uuid) {
+      if (!confirm('¿Eliminar este movimiento?')) return;
+      await dbDelete('movimientos', uuid);
+      estado.movimientos = estado.movimientos.filter(m => m.uuid !== uuid);
+      renderTodo();
+      mostrarToast('🗑️ Movimiento eliminado');
+    }
 
-function workerForm(w) {
-  const opts=allCuad.map(c=>`<option value="${c}"${w?.cuadrilla===c?' selected':''}>${c}</option>`).join('');
-  return `<div style="display:flex;flex-direction:column;gap:12px;">
-    <div>
-      <p class="sec-label">Nombre / Apodo</p>
-      <input id="wf-nom" type="text" value="${w?.nombre||''}" placeholder="Nombre completo o apodo"/>
-    </div>
-    <div>
-      <p class="sec-label">Cuadrilla</p>
-      <select id="wf-cuad"><option value="">Sin cuadrilla</option>${opts}</select>
-    </div>
-    <button class="btn-primary" onclick="saveWorker(${w?w.id:'null'})" style="margin-top:4px;">
-      ${w?'Guardar cambios':'Agregar trabajador'}
-    </button>
-    ${w?`<button onclick="delWorker(${w.id})" class="btn-primary red" style="margin-top:4px;">Eliminar</button>`:''}
-  </div>`;
-}
+    // =========================================================================
+    // 5. PESTAÑA 2: RESUMEN SEMANAL, LIQUIDACIÓN RÁPIDA Y EXCEL (SHEETJS)
+    // =========================================================================
+    function renderTablaResumen() {
+      const filtroCuad = document.getElementById('filtroResumenCuadrilla')?.value || 'TODAS';
+      const filtroNom = (document.getElementById('filtroResumenNombre')?.value || '').toLowerCase().trim();
+      const tbody = document.getElementById('tbodyResumen');
 
-async function saveWorker(id) {
-  const nombre=document.getElementById('wf-nom').value.trim();
-  const cuad  =document.getElementById('wf-cuad').value;
-  if(!nombre){ showToast('⚠️ Escribe un nombre'); return; }
-  if(id===null||id==='null') await dbAdd('trabajadores',{nombre,cuadrilla:cuad});
-  else { const w=allWorkers.find(w=>w.id===id); await dbPut('trabajadores',{...w,nombre,cuadrilla:cuad}); }
-  await loadWorkers();
-  renderWorkersCfg();
-  closeModal();
-  showToast(`✅ ${nombre} guardado`);
-}
+      let totalAnt = 0, totalSem = 0, totalAbono = 0, totalPorCobrar = 0;
 
-async function delWorker(id) {
-  if(!confirm('¿Eliminar trabajador? Sus movimientos se conservan.')) return;
-  await dbDel('trabajadores',id);
-  await loadWorkers();
-  renderWorkersCfg();
-  closeModal();
-  showToast('Trabajador eliminado');
-}
+      const filasHTML = estado.trabajadores
+        .filter(t => (filtroCuad === 'TODAS' || t.cuadrilla === filtroCuad) && (!filtroNom || t.nombre.toLowerCase().includes(filtroNom)))
+        .map(t => {
+          const m = calcularMetricasTrabajador(t.id);
+          totalAnt += m.saldoAnterior;
+          totalSem += m.consumoSemana;
+          totalAbono += m.abonosSemana;
+          totalPorCobrar += m.saldoActual;
 
-// ════════════════════════════════
-// WEBHOOK
-// ════════════════════════════════
-async function saveWebhook() {
-  const v=document.getElementById('inp-webhook').value.trim();
-  await dbPut('config',{key:'webhook',value:v});
-  showToast('✅ URL guardada');
-}
+          const celdaDia = (dia) => {
+            const d = m.porDia[dia];
+            const totalDia = d.Desayuno + d.Comida + d.Soda;
+            if (totalDia === 0 && d.Abono === 0) return `<span class="text-slate-600">-</span>`;
+            return `
+              <div class="leading-tight">
+                ${totalDia > 0 ? `<div class="font-bold text-slate-200">$${totalDia}</div>` : ''}
+                <div class="text-[10px] text-slate-400">
+                  ${d.Desayuno ? `D:${d.Desayuno} ` : ''}${d.Comida ? `C:${d.Comida} ` : ''}${d.Soda ? `S:${d.Soda}` : ''}
+                </div>
+              </div>
+            `;
+          };
 
-// ════════════════════════════════
-// BACKUP
-// ════════════════════════════════
-async function exportBackup() {
-  const m=await dbGetAll('movimientos'), w=await dbGetAll('trabajadores');
-  const blob=new Blob([JSON.stringify({movimientos:m,trabajadores:w,ts:Date.now()},null,2)],{type:'application/json'});
-  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
-  a.download=`backup_${tzNow().date}.json`; a.click();
-  showToast('📦 Backup exportado');
-}
-async function importBackup(e) {
-  const file=e.target.files[0]; if(!file) return;
-  const data=JSON.parse(await file.text());
-  if(!confirm(`¿Importar ${data.trabajadores?.length||0} trabajadores y ${data.movimientos?.length||0} movimientos?`)) return;
-  for(const w of(data.trabajadores||[])) await dbPut('trabajadores',w);
-  for(const m of(data.movimientos||[])) await dbPut('movimientos',m);
-  await loadWorkers(); showToast('✅ Importado');
-}
-async function limpiarSemana() {
-  const wb=getWeekBounds();
-  if(!confirm(`¿Eliminar movimientos anteriores al ${wb.start}?`)) return;
-  const movs=await dbGetAll('movimientos');
-  let n=0;
-  for(const m of movs.filter(m=>m.fecha<wb.start && m.synced)) { await dbDel('movimientos',m.id); n++; }
-  showToast(`🗑️ ${n} registros eliminados`);
-}
+          return `
+            <tr class="hover:bg-slate-900/50">
+              <td class="p-2.5">
+                <div class="font-extrabold text-white">${t.nombre}</div>
+                <div class="text-[10px] text-slate-400">${t.cuadrilla}</div>
+              </td>
+              <td class="p-2.5 text-right font-mono text-slate-300">$${m.saldoAnterior}</td>
+              <td class="p-2.5 text-center">${celdaDia('Lunes')}</td>
+              <td class="p-2.5 text-center">${celdaDia('Martes')}</td>
+              <td class="p-2.5 text-center">${celdaDia('Miércoles')}</td>
+              <td class="p-2.5 text-center">${celdaDia('Jueves')}</td>
+              <td class="p-2.5 text-center">${celdaDia('Viernes')}</td>
+              <td class="p-2.5 text-center">${celdaDia('Sábado')}</td>
+              <td class="p-2.5 text-right font-mono font-bold text-amber-400">$${m.consumoSemana}</td>
+              <td class="p-2.5 text-right font-mono font-bold text-emerald-400">$${m.abonosSemana}</td>
+              <td class="p-2.5 text-right font-mono font-black text-sm ${m.saldoActual > 0 ? 'text-rose-400' : 'text-emerald-400'}">
+                ${m.saldoActual > 0 ? `$${m.saldoActual}` : 'LIQUIDADO'}
+              </td>
+              <td class="p-2.5 text-center">
+                ${m.saldoActual > 0 ? `
+                  <button onclick="liquidarCuentaTrabajador('${t.id}', ${m.saldoActual})" class="btn-active bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold px-2.5 py-1 rounded-lg">
+                    Liquidar $${m.saldoActual}
+                  </button>
+                ` : `<span class="text-emerald-400 text-xs">✓</span>`}
+              </td>
+            </tr>
+          `;
+        }).join('');
 
-// ════════════════════════════════
-// MODAL — completamente nativo
-// ════════════════════════════════
-function openModal(title, content) {
-  document.getElementById('modal-title').textContent = title;
-  document.getElementById('modal-body').innerHTML    = content;
-  document.getElementById('modal-overlay').style.display = 'flex';
-  document.body.style.overflow = 'hidden';
-}
-function closeModal() {
-  document.getElementById('modal-overlay').style.display = 'none';
-  document.body.style.overflow = '';
-}
-function handleOverlayClick(e) {
-  if (e.target === document.getElementById('modal-overlay')) closeModal();
-}
+      tbody.innerHTML = filasHTML;
+      document.getElementById('kpiSaldoAnt').textContent = `$${totalAnt}`;
+      document.getElementById('kpiConsumoSem').textContent = `$${totalSem}`;
+      document.getElementById('kpiAbonado').textContent = `$${totalAbono}`;
+      document.getElementById('kpiPorCobrar').textContent = `$${totalPorCobrar}`;
+    }
 
-// ════════════════════════════════
-// TOAST
-// ════════════════════════════════
-let _toastTimer;
-function showToast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
-  clearTimeout(_toastTimer);
-  _toastTimer = setTimeout(()=>el.classList.remove('show'), 2400);
-}
+    async function liquidarCuentaTrabajador(trabajadorId, montoPendiente) {
+      const trab = estado.trabajadores.find(t => t.id === trabajadorId);
+      if (!trab || montoPendiente <= 0) return;
+      if (!confirm(`¿Registrar pago total de $${montoPendiente} para ${trab.nombre}?`)) return;
 
-// ════════════════════════════════
-// START
-// ════════════════════════════════
-init();
-</script>
+      const tiempoTJ = obtenerTiempoTijuana();
+      const abonoMov = {
+        uuid: crypto.randomUUID ? crypto.randomUUID() : ('ABONO-' + Date.now()),
+        trabajadorId: trab.id,
+        nombre: trab.nombre,
+        cuadrilla: trab.cuadrilla,
+        tipo: 'Abono',
+        monto: montoPendiente,
+        fechaTijuana: tiempoTJ.fecha,
+        horaTijuana: tiempoTJ.hora,
+        diaSemana: tiempoTJ.diaSemana,
+        synced: 0,
+        timestamp: Date.now()
+      };
+
+      await dbPut('movimientos', abonoMov);
+      estado.movimientos.push(abonoMov);
+      renderTodo();
+      mostrarToast(`💵 Cuenta liquidada: ${trab.nombre} ($${montoPendiente})`);
+    }
+
+    // Exportar estructura idéntica a Control_Semanal_Comidas.xlsx (Lunes a Sábado por Desayuno, Comida, Soda)
+    function exportarExcelLocal() {
+      if (typeof XLSX === 'undefined') {
+        mostrarToast('⚠️ Librería Excel no disponible');
+        return;
+      }
+
+      const dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+      const filasResumen = estado.trabajadores.map(t => {
+        const m = calcularMetricasTrabajador(t.id);
+        const fila = {
+          'Cuadrilla': t.cuadrilla,
+          'Nombre': t.nombre,
+          'Saldo Anterior': m.saldoAnterior
+        };
+
+        dias.forEach(d => {
+          fila[`${d} - Desayuno`] = m.porDia[d].Desayuno;
+          fila[`${d} - Comida`] = m.porDia[d].Comida;
+          fila[`${d} - Soda`] = m.porDia[d].Soda;
+        });
+
+        fila['Total Semana'] = m.consumoSemana;
+        fila['Total Abonado'] = m.abonosSemana;
+        fila['Saldo Actual'] = m.saldoActual;
+        fila['Estado'] = m.saldoActual <= 0 ? 'LIQUIDADO' : 'PENDIENTE';
+        return fila;
+      });
+
+      const filasBitacora = estado.movimientos.map(mov => ({
+        'UUID': mov.uuid,
+        'Fecha (Tijuana)': mov.fechaTijuana,
+        'Hora (Tijuana)': mov.horaTijuana,
+        'Día': mov.diaSemana,
+        'Cuadrilla': mov.cuadrilla,
+        'Trabajador': mov.nombre,
+        'Tipo': mov.tipo,
+        'Monto': mov.monto,
+        'Sincronizado': mov.synced ? 'SÍ' : 'NO'
+      }));
+
+      const wb = XLSX.utils.book_new();
+      const wsResumen = XLSX.utils.json_to_sheet(filasResumen);
+      const wsBitacora = XLSX.utils.json_to_sheet(filasBitacora);
+
+      XLSX.utils.book_append_sheet(wb, wsResumen, 'Control_Semanal');
+      XLSX.utils.book_append_sheet(wb, wsBitacora, 'Bitacora_Movimientos');
+
+      XLSX.writeFile(wb, `Control_Semanal_Comidas_${obtenerTiempoTijuana().fecha}.xlsx`);
+      mostrarToast('📥 Excel descargado correctamente');
+    }
+
+    async function cerrarSemanaArrastrarSaldos() {
+      if (!confirm('¿Cerrar la semana actual? El Saldo Actual de cada trabajador pasará a ser su Saldo Anterior y se limpiarán los consumos de esta semana.')) return;
+
+      for (const t of estado.trabajadores) {
+        const { saldoActual } = calcularMetricasTrabajador(t.id);
+        t.saldoAnterior = saldoActual;
+        await dbPut('trabajadores', t);
+      }
+
+      await dbClear('movimientos');
+      estado.movimientos = [];
+      renderTodo();
+      mostrarToast('🔒 Semana cerrada. Saldos pendientes arrastrados a la nueva semana.');
+    }
+
+    // =========================================================================
+    // 6. SINCRONIZACIÓN OFFLINE/ONLINE CON GOOGLE APPS SCRIPT
+    // =========================================================================
+    function actualizarContadorPendientes() {
+      const pendientes = estado.movimientos.filter(m => m.synced === 0).length;
+      document.getElementById('badgePendientes').textContent = pendientes;
+    }
+
+    function actualizarEstadoRed() {
+      const online = navigator.onLine;
+      const badge = document.getElementById('statusBadge');
+      const dot = document.getElementById('statusDot');
+      const text = document.getElementById('statusText');
+
+      if (online) {
+        badge.className = 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+        dot.className = 'w-2 h-2 rounded-full bg-emerald-400 animate-pulse';
+        text.textContent = 'En línea';
+        if (estado.webhookUrl) sincronizarConSheets(true);
+      } else {
+        badge.className = 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30';
+        dot.className = 'w-2 h-2 rounded-full bg-amber-400';
+        text.textContent = 'Sin conexión (Modo Obra)';
+      }
+    }
+
+    window.addEventListener('online', actualizarEstadoRed);
+    window.addEventListener('offline', actualizarEstadoRed);
+
+    async function sincronizarConSheets(silencioso = false) {
+      if (!estado.webhookUrl) {
+        if (!silencioso) abrirModalConfig();
+        return;
+      }
+      if (!navigator.onLine) {
+        if (!silencioso) mostrarToast('⚠️ No hay internet en este momento. Tus datos están seguros en el teléfono.');
+        return;
+      }
+
+      const pendientes = estado.movimientos.filter(m => m.synced === 0);
+      if (pendientes.length === 0 && !silencioso) {
+        mostrarToast('☁️ Todo está sincronizado');
+        return;
+      }
+
+      const btn = document.getElementById('btnSync');
+      btn.disabled = true;
+
+      try {
+        // Se usa text/plain para evitar bloqueo CORS preflight de Google Apps Script
+        const res = await fetch(estado.webhookUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: 'SYNC_BATCH',
+            fechaCorteTijuana: obtenerTiempoTijuana().isoTijuana,
+            trabajadores: estado.trabajadores,
+            movimientos: pendientes
+          })
+        });
+
+        const data = await res.json();
+        if (data && data.status === 'ok') {
+          for (const m of pendientes) {
+            m.synced = 1;
+            await dbPut('movimientos', m);
+          }
+          renderTodo();
+          if (!silencioso) mostrarToast(`☁️ Sincronizados ${pendientes.length} registros con Google Sheets`);
+        } else {
+          throw new Error(data.message || 'Respuesta inválida');
+        }
+      } catch (err) {
+        if (!silencioso) mostrarToast('⚠️ Error al sincronizar. Se reintentará cuando mejore la señal.');
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    // =========================================================================
+    // 7. MODALES, NAVEGACIÓN Y SERVICE WORKER
+    // =========================================================================
+    function cambiarVista(vista) {
+      const esReg = vista === 'registro';
+      document.getElementById('vistaRegistro').classList.toggle('hidden', !esReg);
+      document.getElementById('vistaResumen').classList.toggle('hidden', esReg);
+
+      document.getElementById('tabBtnRegistro').className = esReg
+        ? 'py-2.5 rounded-lg font-extrabold text-sm transition-all bg-amber-500 text-slate-950 shadow'
+        : 'py-2.5 rounded-lg font-extrabold text-sm transition-all text-slate-300 hover:text-white';
+
+      document.getElementById('tabBtnResumen').className = !esReg
+        ? 'py-2.5 rounded-lg font-extrabold text-sm transition-all bg-amber-500 text-slate-950 shadow'
+        : 'py-2.5 rounded-lg font-extrabold text-sm transition-all text-slate-300 hover:text-white';
+
+      if (!esReg) renderTablaResumen();
+    }
+
+    function abrirModalTrabajador() {
+      document.getElementById('modalTrabajador').classList.remove('hidden');
+    }
+    function cerrarModalTrabajador() {
+      document.getElementById('modalTrabajador').classList.add('hidden');
+    }
+
+    async function guardarNuevoTrabajador() {
+      const nombre = document.getElementById('nuevoTrabNombre').value.trim();
+      const cuadrilla = document.getElementById('nuevoTrabCuadrilla').value.trim() || 'General';
+      const saldoAnterior = Number(document.getElementById('nuevoTrabSaldoAnt').value || 0);
+
+      if (!nombre) {
+        mostrarToast('⚠️ Escribe el nombre o apodo');
+        return;
+      }
+
+      const nuevo = {
+        id: 'T-' + Date.now(),
+        nombre,
+        cuadrilla,
+        saldoAnterior
+      };
+
+      await dbPut('trabajadores', nuevo);
+      estado.trabajadores.push(nuevo);
+      estado.trabajadorSeleccionadoId = nuevo.id;
+
+      document.getElementById('nuevoTrabNombre').value = '';
+      document.getElementById('nuevoTrabSaldoAnt').value = '0';
+      cerrarModalTrabajador();
+      renderTodo();
+      mostrarToast(`👷 Trabajador agregado: ${nombre}`);
+    }
+
+    function abrirModalConfig() {
+      document.getElementById('inputWebhookUrl').value = estado.webhookUrl;
+      document.getElementById('modalConfig').classList.remove('hidden');
+    }
+    function cerrarModalConfig() {
+      document.getElementById('modalConfig').classList.add('hidden');
+    }
+    function guardarConfigWebhook() {
+      const url = document.getElementById('inputWebhookUrl').value.trim();
+      estado.webhookUrl = url;
+      localStorage.setItem('webhook_gas_url', url);
+      cerrarModalConfig();
+      mostrarToast('⚙️ URL de Google Sheets guardada');
+      if (url && navigator.onLine) sincronizarConSheets();
+    }
+
+    let toastTimeout;
+    function mostrarToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.remove('hidden');
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => t.classList.add('hidden'), 3000);
+    }
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+      });
+    }
+
+    cargarDatosIniciales();
+  </script>
 </body>
 </html>
